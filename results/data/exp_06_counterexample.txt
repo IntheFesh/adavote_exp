@@ -1,0 +1,44 @@
+======================================================================
+exp_06 — PREFIX DRIFT COUNTEREXAMPLE
+======================================================================
+Setting:    N=5,H=3
+Game seed:  5300033
+S=4, A=3, H=3, N=5, n=2
+true_loss:   0.19042486
+naive_bound: 0.18831643
+C~*:         0.19255064
+Margin (true_loss - naive): 0.00210843  [> 1e-3  CONFIRMED]
+
+Mechanistic note:
+  The naive bound computes W~(t,s,i,ref_prefix) at the REFERENCE prefix only,
+  then multiplies by d^ctrl_t(s), ignoring that the controller's actual
+  prefix distribution at (t,s) places positive mass on NON-reference prefixes.
+  Because transitions are action-DEPENDENT, different prefixes lead to
+  different next-state distributions and hence different Q-values and W~.
+  The joint C~* correctly integrates over all prefixes via
+      rho(u) = d_ctrl[t,s] * P(prefix a_{<i} | t,s),
+  capturing the full drift. The naive bound misses drifted-prefix mass,
+  underbounding true loss by the margin shown above.
+
+Top drifted units (non-ref prefix, g>0, rho*g*W~ contribution):
+  (t=1,s=3,i=1) prefix=(2,) ref_prefix=(1,): P(prefix|t,s)=0.0536, g=0.3202, W~=0.4459, rho*g*W~=0.003515
+  (t=2,s=0,i=1) prefix=(0,) ref_prefix=(2,): P(prefix|t,s)=0.1341, g=0.3407, W~=0.2517, rho*g*W~=0.002719
+  (t=1,s=3,i=1) prefix=(0,) ref_prefix=(1,): P(prefix|t,s)=0.0536, g=0.4020, W~=0.2488, rho*g*W~=0.002463
+  (t=2,s=0,i=1) prefix=(1,) ref_prefix=(2,): P(prefix|t,s)=0.1341, g=0.3508, W~=0.0542, rho*g*W~=0.000602
+  (t=1,s=2,i=1) prefix=(0,) ref_prefix=(2,): P(prefix|t,s)=0.0459, g=0.2988, W~=0.1723, rho*g*W~=0.000591
+  (t=2,s=1,i=1) prefix=(0,) ref_prefix=(1,): P(prefix|t,s)=0.0239, g=0.3735, W~=0.1318, rho*g*W~=0.000337
+  (t=0,s=0,i=1) prefix=(1,) ref_prefix=(0,): P(prefix|t,s)=0.0536, g=0.2254, W~=0.1228, rho*g*W~=0.000274
+  (t=0,s=3,i=1) prefix=(1,) ref_prefix=(2,): P(prefix|t,s)=0.0436, g=0.1078, W~=0.1979, rho*g*W~=0.000206
+  (t=1,s=0,i=1) prefix=(1,) ref_prefix=(2,): P(prefix|t,s)=0.0646, g=0.0524, W~=0.3814, rho*g*W~=0.000201
+  (t=0,s=1,i=1) prefix=(2,) ref_prefix=(1,): P(prefix|t,s)=0.0076, g=0.0982, W~=0.4059, rho*g*W~=0.000171
+
+Q-tables at affected (t,s) positions:
+  (t=1, s=3)  ref_joint=(1, 0)
+    Agent 0 (ref_prefix=()): Q=[1.9106 1.9247 1.8676], delta_+=[0.014 0.    0.057], W~=0.0237, g=0.1609
+    Agent 1 (ref_prefix=(1,)): Q=[1.9247 1.03   1.5378], delta_+=[0.     0.8947 0.3869], W~=0.4272, g=0.0093
+  (t=2, s=0)  ref_joint=(2, 1)
+    Agent 0 (ref_prefix=()): Q=[0.6773 0.3566 0.8979], delta_+=[0.2206 0.5413 0.    ], W~=0.2540, g=0.4022
+    Agent 1 (ref_prefix=(2,)): Q=[0.0701 0.8979 0.0878], delta_+=[0.8278 0.     0.8101], W~=0.5460, g=0.0584
+  (t=1, s=2)  ref_joint=(2, 0)
+    Agent 0 (ref_prefix=()): Q=[1.532  1.7398 1.9325], delta_+=[0.4004 0.1927 0.    ], W~=0.1977, g=0.1377
+    Agent 1 (ref_prefix=(2,)): Q=[1.9325 1.2099 1.5893], delta_+=[0.     0.7226 0.3432], W~=0.3553, g=0.2250

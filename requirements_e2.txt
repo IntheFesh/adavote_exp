@@ -1,0 +1,22 @@
+# E2 (JaxMARL diagnostics, GPU) requirements.
+#
+# IMPORTANT: jaxlib must match your CUDA toolkit. Pick ONE of the install
+# lines below (see README.md "E2 / AutoDL GPU setup").
+#
+#   RTX 5090 (CUDA <= 13.2, driver 595.x) or vGPU-48GB (CUDA <= 13.0, driver 580.x):
+#     pip install -U "jax[cuda12]"            # CUDA 12.x wheels (recommended baseline)
+#   CPU fallback (no GPU):
+#     pip install -U "jax[cpu]"   and run with  JAX_PLATFORMS=cpu
+#
+# After installing the correct jax/jaxlib, install the rest:
+
+jax>=0.4.30
+flax>=0.8
+optax>=0.2
+distrax>=0.1.5
+jaxmarl>=0.0.3
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+pandas>=2.0
+tqdm>=4.65

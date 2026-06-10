@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# E2 model checkpoints (large, regenerable on GPU)
+results/e2/checkpoints/
+
+# OS
+.DS_Store
