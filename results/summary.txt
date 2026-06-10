@@ -1,11 +1,11 @@
-exp_01 chain_ordering [PASS] games=60 violations=0 median C0/true=8.31 C*/true=2.04 C~*/true=1.02
-exp_02 eta_positive_success_term [PASS] games=60  eta=0.0: fail_rate=0.000 succ_rate=0.000  eta=0.1: fail_rate=1.000 succ_rate=0.000  eta=0.2: fail_rate=1.000 succ_rate=0.000  eta=0.3: fail_rate=1.000 succ_rate=0.000
-exp_03 estimator [PASS] median_tightness Pi2=1.183 Pi1=2.280  Pi2/m=500: cov=1.000  Pi2/m=1500: cov=1.000  Pi2/m=5000: cov=1.000  Pi1/m=500: cov=1.000  Pi1/m=1500: cov=1.000  Pi1/m=5000: cov=1.000
+exp_01 chain_ordering [PASS] games=300 violations=0 median C0/true=8.53 C*/true=2.05 C~*/true=1.02
+exp_02 eta_positive_success_term [PASS] games=300  eta=0.0: fail_rate=0.000 succ_rate=0.000  eta=0.1: fail_rate=1.000 succ_rate=0.000  eta=0.2: fail_rate=1.000 succ_rate=0.000  eta=0.3: fail_rate=1.000 succ_rate=0.000
+exp_03 estimator [PASS] median_tightness Pi2=1.199 Pi1=2.302  Pi2/m=500: cov=1.000  Pi2/m=1500: cov=1.000  Pi2/m=5000: cov=1.000  Pi1/m=500: cov=1.000  Pi1/m=1500: cov=1.000  Pi1/m=5000: cov=1.000
 exp_04 marginal_fails [PASS] part_a_gap=0.0033 n16_ratio=3.4462 theory_n16=3.4462 closed_form==enum(n<=14)=True ratio_n1=1.0
-exp_05 falsification [PASS] Ctilde_viol=0.000 naive_marginal_viol=0.000 unweighted_viol=1.000 worst_prefix_viol=0.000(slack=0.0722) plugin_alpha_viol=0.250 no_logging_viol=0.000(slack=0.4285)
-exp_06 prefix_drift [PASS] total_games=720 drift_rate=1.000 naive_viol_rate=0.0028 joint_viol_rate=0.000000 counterexample_margin=0.002108
-exp_07 witness_sharpness [PASS] witnesses=85 max_occ_err=3.331e-16 max_cert_err=0.000e+00 non_collapsed=1 ctilde_ge_true=1
+exp_05 falsification [PASS] Ctilde_viol=0.000 naive_marginal_viol=0.007 unweighted_viol=1.000 worst_prefix_viol=0.000(slack=0.0762) plugin_alpha_viol=0.227 no_logging_viol=0.000(slack=0.4257)
+exp_06 prefix_drift [PASS] total_games=3600 drift_rate=1.000 naive_viol_rate=0.0025 joint_viol_rate=0.000000 counterexample_margin=0.003596
+exp_07 witness_sharpness [PASS] witnesses=85 max_occ_err=2.220e-16 max_cert_err=0.000e+00 non_collapsed=1 ctilde_ge_true=1
 exp_08 rank_consistency [PASS] (a)mono_frac=1.000[PASS] (b)bi_mono_frac=1.000[PASS] (c)median_spearman=1.0000[PASS] reversals_found=0
-exp_09 budget_increase [PASS] g1_marginal_wins=1.0000[PASS] g1_disagree_top1=0.8167 g1_disagree_top2=0.9833 g2a_violations=0[PASS] g2b_noincrease_frac=1.0000[PASS] g2c_rise_frac=0.2556[PASS] g3_drift_count=374[PASS]
+exp_09 budget_increase [PASS] g1_marginal_wins=1.0000[PASS] g1_disagree_top1=0.8200 g1_disagree_top2=0.9100 g2a_violations=0[PASS] g2b_noincrease_frac=0.9867[PASS] g2c_rise_frac=0.2550[PASS] g3_drift_count=375[PASS]
 exp_10 eligibility [PASS] iff_violations=0[PASS] alpha03_increasing=True[PASS] n_alpha=37 n_N=11
-exp_11 wrapper_vs_naive [PASS] eta0_unit_mismatches=0/3840 max_exec_diff=4.42e-10 max_g_diff=9.05e-10 rel_gap(eta=0)=0.00e+00 rel_gap(eta=0.3)=0.164 monotone_in_eta=True
+exp_11 wrapper_vs_naive [PASS] eta0_unit_mismatches=0/6400 max_exec_diff=4.46e-10 max_g_diff=9.07e-10 rel_gap(eta=0)=0.00e+00 rel_gap(eta=0.3)=0.159 monotone_in_eta=True
