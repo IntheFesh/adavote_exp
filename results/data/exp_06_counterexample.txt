@@ -2,12 +2,12 @@
 exp_06 — PREFIX DRIFT COUNTEREXAMPLE
 ======================================================================
 Setting:    N=7,H=3
-Game seed:  7300180
+Game seed:  7300349
 S=4, A=3, H=3, N=7, n=2
-true_loss:   0.18798673
-naive_bound: 0.18439035
-C~*:         0.19307743
-Margin (true_loss - naive): 0.00359638  [> 1e-3  CONFIRMED]
+true_loss:   0.21289820
+naive_bound: 0.20946900
+C~*:         0.21489132
+Margin (true_loss - naive): 0.00342920  [> 1e-3  CONFIRMED]
 
 Mechanistic note:
   The naive bound computes W~(t,s,i,ref_prefix) at the REFERENCE prefix only,
@@ -21,27 +21,30 @@ Mechanistic note:
   underbounding true loss by the margin shown above.
 
 Top drifted units (non-ref prefix, g>0, rho*g*W~ contribution):
-  (t=2,s=2,i=1) prefix=(0,) ref_prefix=(1,): P(prefix|t,s)=0.1036, g=0.2459, W~=0.5934, rho*g*W~=0.006556
-  (t=0,s=1,i=1) prefix=(2,) ref_prefix=(0,): P(prefix|t,s)=0.1304, g=0.2484, W~=0.4403, rho*g*W~=0.005123
-  (t=1,s=1,i=1) prefix=(2,) ref_prefix=(0,): P(prefix|t,s)=0.1140, g=0.0696, W~=0.3771, rho*g*W~=0.000477
-  (t=0,s=3,i=1) prefix=(1,) ref_prefix=(2,): P(prefix|t,s)=0.1014, g=0.2651, W~=0.1095, rho*g*W~=0.000451
-  (t=1,s=1,i=1) prefix=(1,) ref_prefix=(0,): P(prefix|t,s)=0.1140, g=0.1265, W~=0.1581, rho*g*W~=0.000364
-  (t=0,s=2,i=1) prefix=(1,) ref_prefix=(0,): P(prefix|t,s)=0.0273, g=0.1352, W~=0.2713, rho*g*W~=0.000245
-  (t=0,s=3,i=1) prefix=(0,) ref_prefix=(2,): P(prefix|t,s)=0.1014, g=0.0371, W~=0.3570, rho*g*W~=0.000206
-  (t=1,s=3,i=1) prefix=(1,) ref_prefix=(0,): P(prefix|t,s)=0.0255, g=0.0584, W~=0.1280, rho*g*W~=0.000040
-  (t=2,s=3,i=1) prefix=(1,) ref_prefix=(2,): P(prefix|t,s)=0.0207, g=0.0463, W~=0.1075, rho*g*W~=0.000018
-  (t=0,s=0,i=1) prefix=(1,) ref_prefix=(2,): P(prefix|t,s)=0.0038, g=0.1283, W~=0.1516, rho*g*W~=0.000018
+  (t=0,s=2,i=1) prefix=(1,) ref_prefix=(2,): P(prefix|t,s)=0.0694, g=0.2824, W~=0.4101, rho*g*W~=0.005265
+  (t=1,s=0,i=1) prefix=(0,) ref_prefix=(2,): P(prefix|t,s)=0.0955, g=0.3576, W~=0.4579, rho*g*W~=0.004091
+  (t=2,s=3,i=1) prefix=(2,) ref_prefix=(0,): P(prefix|t,s)=0.0615, g=0.3785, W~=0.2568, rho*g*W~=0.001311
+  (t=1,s=3,i=1) prefix=(1,) ref_prefix=(2,): P(prefix|t,s)=0.0701, g=0.1773, W~=0.4542, rho*g*W~=0.000896
+  (t=2,s=1,i=1) prefix=(2,) ref_prefix=(1,): P(prefix|t,s)=0.0615, g=0.0893, W~=0.3243, rho*g*W~=0.000335
+  (t=0,s=3,i=1) prefix=(1,) ref_prefix=(2,): P(prefix|t,s)=0.0249, g=0.3078, W~=0.2290, rho*g*W~=0.000282
+  (t=1,s=0,i=1) prefix=(1,) ref_prefix=(2,): P(prefix|t,s)=0.0955, g=0.0932, W~=0.1211, rho*g*W~=0.000282
+  (t=0,s=3,i=1) prefix=(0,) ref_prefix=(2,): P(prefix|t,s)=0.0249, g=0.2966, W~=0.2219, rho*g*W~=0.000264
+  (t=1,s=3,i=1) prefix=(0,) ref_prefix=(2,): P(prefix|t,s)=0.0701, g=0.1566, W~=0.1013, rho*g*W~=0.000176
+  (t=2,s=1,i=1) prefix=(0,) ref_prefix=(1,): P(prefix|t,s)=0.0615, g=0.1457, W~=0.0922, rho*g*W~=0.000156
 
 Q-tables at affected (t,s) positions:
-  (t=2, s=2)  ref_joint=(1, 1)
-    Agent 0 (ref_prefix=()): Q=[0.9422 0.9553 0.141 ], delta_+=[0.0131 0.     0.8144], W~=0.2758, g=0.3108
-    Agent 1 (ref_prefix=(1,)): Q=[0.7811 0.9553 0.2848], delta_+=[0.1743 0.     0.6705], W~=0.2816, g=0.0429
-  (t=0, s=1)  ref_joint=(0, 1)
-    Agent 0 (ref_prefix=()): Q=[2.6523 2.1884 2.5902], delta_+=[0.     0.4639 0.0622], W~=0.1754, g=0.3912
-    Agent 1 (ref_prefix=(0,)): Q=[1.7789 2.6523 2.4408], delta_+=[0.8735 0.     0.2116], W~=0.3617, g=0.0622
-  (t=1, s=1)  ref_joint=(0, 1)
-    Agent 0 (ref_prefix=()): Q=[1.8828 1.2891 1.6729], delta_+=[0.     0.5937 0.2099], W~=0.2679, g=0.3420
-    Agent 1 (ref_prefix=(0,)): Q=[1.4714 1.8828 1.5214], delta_+=[0.4114 0.     0.3614], W~=0.2576, g=0.0041
-  (t=0, s=3)  ref_joint=(2, 1)
-    Agent 0 (ref_prefix=()): Q=[2.5286 2.4349 2.7049], delta_+=[0.1764 0.27   0.    ], W~=0.1488, g=0.3042
-    Agent 1 (ref_prefix=(2,)): Q=[1.8127 2.7049 1.9261], delta_+=[0.8922 0.     0.7788], W~=0.5570, g=0.0155
+  (t=0, s=2)  ref_joint=(2, 2)
+    Agent 0 (ref_prefix=()): Q=[2.0789 2.8091 2.8146], delta_+=[0.7358 0.0056 0.    ], W~=0.2471, g=0.2083
+    Agent 1 (ref_prefix=(2,)): Q=[2.3213 2.5741 2.8146], delta_+=[0.4934 0.2405 0.    ], W~=0.2446, g=0.1912
+  (t=1, s=0)  ref_joint=(2, 2)
+    Agent 0 (ref_prefix=()): Q=[1.7383 1.5015 1.888 ], delta_+=[0.1497 0.3865 0.    ], W~=0.1787, g=0.2866
+    Agent 1 (ref_prefix=(2,)): Q=[1.1242 1.7187 1.888 ], delta_+=[0.7638 0.1693 0.    ], W~=0.3111, g=0.0469
+  (t=2, s=3)  ref_joint=(0, 2)
+    Agent 0 (ref_prefix=()): Q=[0.9906 0.2118 0.8735], delta_+=[0.     0.7789 0.1171], W~=0.2987, g=0.1845
+    Agent 1 (ref_prefix=(0,)): Q=[0.714  0.9276 0.9906], delta_+=[0.2767 0.063  0.    ], W~=0.1132, g=0.1345
+  (t=1, s=3)  ref_joint=(2, 2)
+    Agent 0 (ref_prefix=()): Q=[1.2009 1.8361 1.8465], delta_+=[0.6456 0.0105 0.    ], W~=0.2187, g=0.2103
+    Agent 1 (ref_prefix=(2,)): Q=[1.4085 1.6444 1.8465], delta_+=[0.4381 0.2021 0.    ], W~=0.2134, g=0.0038
+  (t=2, s=1)  ref_joint=(1, 0)
+    Agent 0 (ref_prefix=()): Q=[0.5285 0.7535 0.7101], delta_+=[0.225  0.     0.0434], W~=0.0895, g=0.1846
+    Agent 1 (ref_prefix=(1,)): Q=[0.7535 0.3023 0.5706], delta_+=[0.     0.4512 0.1829], W~=0.2114, g=0.1538

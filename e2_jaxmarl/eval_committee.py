@@ -51,7 +51,7 @@ try:
     import distrax  # noqa: F401
     from jaxmarl import make as jaxmarl_make
     # Reuse the network + config from the trainer.
-    from e2_jaxmarl.train_committee import default_config, _build_network
+    from e2_jaxmarl.train_committee import default_config, _build_network, _resolve_env_name, ActorMLP
     _JAX_AVAILABLE = True
 except Exception as _e:  # ImportError or downstream errors on CPU-only boxes
     _IMPORT_ERROR_MSG = str(_e)
@@ -131,10 +131,30 @@ def evaluate_committee(
     """
     _require_jax()
     config = members[ref_member]["config"]
-    env = jaxmarl_make(env_name, **config.get("ENV_KWARGS", {}))
+    env = jaxmarl_make(_resolve_env_name(env_name), **config.get("ENV_KWARGS", {}))
     nets = _build_network(env, config)  # dict {agent: ActorCriticMLP}
 
     ref_params = members[ref_member]["params"]
+    # MAPPO stores params as {"actor": {agent: ...}, "critic": {agent: ...}}
+    # with a standalone ActorMLP per agent; IPPO stores {agent: ActorCriticMLP}.
+    # eval only needs actor logits, so route by algo.
+    is_mappo = (algo == "mappo")
+    actor_nets = {}
+    if is_mappo:
+        actor_hidden = tuple(config["ACTOR_HIDDEN"])
+        for a in env.agents:
+            actor_nets[a] = ActorMLP(
+                hidden_sizes=actor_hidden, action_dim=env.action_space(a).n
+            )
+
+    def _logits(member_params, agent, o):
+        """Return actor logits for `agent` under `member_params`, algo-aware."""
+        if is_mappo:
+            return actor_nets[agent].apply(member_params["actor"][agent], o)
+        else:
+            logits, _val = nets[agent].apply(member_params[agent], o)
+            return logits
+
     advisor_params = [m["params"] for k, m in enumerate(members) if k != ref_member]
     N = len(advisor_params) + 1  # reference also votes (endorses itself)
 
@@ -143,6 +163,11 @@ def evaluate_committee(
 
     endorse_flags: List[float] = []      # per (episode,t,agent): F (majority fail)
     alpha_samples: List[float] = []      # per coordinate endorsement frequency
+    advisor_endorse_count = 0            # total advisor endorsements (for debiased p_hat)
+    advisor_total_count = 0              # total advisor judgments
+    n_advisors = len(advisor_params)     # = N - 1, ordered by member index 1..N-1
+    per_adv_endorse = [0] * n_advisors   # per-advisor endorsement counts
+    per_adv_total = [0] * n_advisors     # per-advisor judgment counts
     wtilde_samples: List[float] = []     # clipped fallback advantage proxy
     fn_membership: List[float] = []      # membership false-negative indicator
     returns: List[float] = []
@@ -159,19 +184,24 @@ def evaluate_committee(
             actions = {}
             for ai, agent in enumerate(agents):
                 o = jnp.asarray(obs[agent])
-                ref_logits, ref_value = nets[agent].apply(ref_params[agent], o)
+                ref_logits = _logits(ref_params, agent, o)
+                ref_value = None  # unused by _advantage_proxy
                 rng, ak = jax.random.split(rng)
                 ref_action = int(jnp.argmax(ref_logits))  # reference = greedy
                 # advisor proposals
                 n_endorse = 1  # reference endorses its own action
                 worst_delta = 0.0
                 fb_deltas = []
-                for ap in advisor_params:
-                    m_logits, _ = nets[agent].apply(ap[agent], o)
+                for _j, ap in enumerate(advisor_params):
+                    m_logits = _logits(ap, agent, o)
                     m_action = int(jnp.argmax(m_logits))
                     d = _advantage_proxy(ref_logits, ref_value, m_action, ref_action)
+                    advisor_total_count += 1
+                    per_adv_total[_j] += 1
                     if d <= eta + 1e-9:
                         n_endorse += 1
+                        advisor_endorse_count += 1
+                        per_adv_endorse[_j] += 1
                     else:
                         fb_deltas.append(d)
                         worst_delta = max(worst_delta, d)
@@ -205,6 +235,16 @@ def evaluate_committee(
                     if all_rewards else 1.0)
     alpha_hat_mean = float(np.mean(alpha_samples)) if alpha_samples else float("nan")
     g_mean = float(np.mean([g_N(N, a) for a in alpha_samples])) if alpha_samples else float("nan")
+    # debiased advisor endorsement rate p_hat (anchor self-vote removed)
+    p_hat = (advisor_endorse_count / advisor_total_count) if advisor_total_count > 0 else float("nan")
+    # anchored majority-failure h_N(p_hat) = P[1 + Bin(N-1, p_hat) <= floor(N/2)]
+    #                                      = P[Bin(N-1, p_hat) <= (N-3)/2]
+    from scipy.stats import binom as _binom
+    if N >= 2 and not np.isnan(p_hat):
+        _k = int(np.floor((N - 3) / 2)) if N >= 3 else -1
+        h_anchored = float(_binom.cdf(_k, N - 1, p_hat)) if _k >= 0 else 0.0
+    else:
+        h_anchored = float("nan")
 
     return {
         "diagnostic_label": DIAG,
@@ -212,6 +252,10 @@ def evaluate_committee(
         "N": N,
         "alpha_hat_mean": alpha_hat_mean,
         "g_mean": g_mean,
+        "p_hat_advisor": p_hat,
+        "h_anchored": h_anchored,
+        "p_hat_per_advisor": [ (per_adv_endorse[j] / per_adv_total[j]) if per_adv_total[j] > 0 else float("nan") for j in range(n_advisors) ],
+        "p_hat_per_advisor_str": ";".join( f"{(per_adv_endorse[j]/per_adv_total[j]):.4f}" if per_adv_total[j] > 0 else "nan" for j in range(n_advisors) ),
         "membership_fn_rate": float(np.mean(fn_membership)) if fn_membership else 0.0,
         "Wtilde_proxy_mean": float(np.mean(wtilde_samples)) if wtilde_samples else 0.0,
         "diag_certificate": float(diag_cert),

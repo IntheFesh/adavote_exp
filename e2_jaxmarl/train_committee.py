@@ -60,6 +60,26 @@ except ImportError as _e:
     _IMPORT_ERROR_MSG = str(_e)
 
 
+# ---------------------------------------------------------------------------
+# Environment name mapping: short names (used throughout the codebase / CLI)
+# -> actual jaxmarl registered names in the installed jaxmarl version.
+# ---------------------------------------------------------------------------
+_JAXMARL_ENV_MAP = {
+    "simple_spread": "MPE_simple_spread_v3",
+    "simple_reference": "MPE_simple_reference_v3",
+    "overcooked_v0": "overcooked",
+    "smax": "SMAX",
+}
+
+
+def _resolve_env_name(name):
+    """Translate a short env name to the jaxmarl registered name.
+    If `name` is already a registered name, it is returned unchanged."""
+    return _JAXMARL_ENV_MAP.get(name, name)
+
+
+
+
 def _require_jax() -> None:
     """Raise a friendly RuntimeError if JAX / JaxMARL are not installed."""
     if not _JAX_AVAILABLE:
@@ -277,7 +297,7 @@ def make_ippo_train(config: Dict[str, Any]):
 
     # Build env
     env_name = config["ENV_NAME"]
-    env = jaxmarl_make(env_name)
+    env = jaxmarl_make(_resolve_env_name(env_name))
     try:
         env = MPELogWrapper(env)
     except Exception:
@@ -354,10 +374,16 @@ def make_ippo_train(config: Dict[str, Any]):
             for agent in agent_keys:
                 a_obs = obs_d[agent]  # (num_envs, obs_dim)
                 net = networks[agent]
+                p_agent = params_d[agent]
                 act_keys = jax.random.split(act_key, num_envs)
-                action, log_prob, value, _ = jax.vmap(
-                    net.get_action_and_value
-                )(a_obs, act_keys)
+
+                def _act(o, k, _net=net, _p=p_agent):
+                    logits, value = _net.apply(_p, o)
+                    pi = distrax.Categorical(logits=logits)
+                    a = pi.sample(seed=k)
+                    return a, pi.log_prob(a), value
+
+                action, log_prob, value = jax.vmap(_act)(a_obs, act_keys)
                 actions[agent] = action
                 log_probs[agent] = log_prob
                 values[agent] = value
@@ -418,20 +444,8 @@ def make_ippo_train(config: Dict[str, Any]):
                 mb_size = batch_size // num_minibatches
 
                 def _ppo_loss(params, obs_mb, act_mb, logp_old_mb, adv_mb, tgt_mb):
-                    new_logp, new_val, entropy = jax.vmap(
-                        lambda o, a: net.get_logprob_and_value(
-                            net.apply(params, o)[0]  # logits placeholder hack
-                            if False else o, a
-                        )
-                    )(obs_mb, act_mb)
-                    # Correct call:
-                    new_logp, new_val, entropy = jax.vmap(
-                        lambda o, a: net.get_logprob_and_value(o, a)
-                    )(obs_mb, act_mb)  # uses params via closure — but need apply
-
-                    # Proper param-applied version:
-                    def _single(o, a):
-                        logits, val = net.apply(params, o)
+                    def _single(o, a, _net=net, _p=params):
+                        logits, val = _net.apply(_p, o)
                         pi = distrax.Categorical(logits=logits)
                         return pi.log_prob(a), val, pi.entropy()
 
@@ -540,7 +554,7 @@ def make_mappo_train(config: Dict[str, Any]):
     import distrax
 
     env_name = config["ENV_NAME"]
-    env = jaxmarl_make(env_name)
+    env = jaxmarl_make(_resolve_env_name(env_name))
     try:
         env = MPELogWrapper(env)
     except Exception:

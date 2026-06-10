@@ -1,0 +1,36 @@
+nohup: ignoring input
+
+============================================================
+=== simple_spread / ippo ===
+============================================================
+[simple_spread/ippo budget=1] alpha=1.000 g=0.000 cert=0.01 return=-21.65 (23s)
+[simple_spread/ippo budget=3] alpha=0.508 g=0.507 cert=31.32 return=-21.65 (60s)
+[simple_spread/ippo budget=5] alpha=0.412 g=0.641 cert=37.03 return=-21.65 (99s)
+[simple_spread/ippo budget=7] alpha=0.357 g=0.724 cert=41.21 return=-21.65 (138s)
+
+============================================================
+=== simple_spread / mappo ===
+============================================================
+[simple_spread/mappo budget=1] alpha=1.000 g=0.000 cert=0.01 return=-19.34 (12s)
+[simple_spread/mappo budget=3] alpha=0.506 g=0.515 cert=21.22 return=-19.34 (32s)
+[simple_spread/mappo budget=5] alpha=0.410 g=0.645 cert=22.76 return=-19.34 (52s)
+[simple_spread/mappo budget=7] alpha=0.371 g=0.705 cert=25.98 return=-19.34 (72s)
+
+============================================================
+=== simple_reference / ippo ===
+============================================================
+[simple_reference/ippo budget=1] alpha=1.000 g=0.000 cert=0.01 return=-22.85 (18s)
+[simple_reference/ippo budget=3] alpha=0.347 g=0.721 cert=57.38 return=-22.85 (41s)
+[simple_reference/ippo budget=5] alpha=0.223 g=0.911 cert=61.09 return=-22.85 (67s)
+[simple_reference/ippo budget=7] alpha=0.174 g=0.966 cert=60.43 return=-22.85 (93s)
+
+============================================================
+=== simple_reference / mappo ===
+============================================================
+[simple_reference/mappo budget=1] alpha=1.000 g=0.000 cert=0.01 return=-24.72 (9s)
+[simple_reference/mappo budget=3] alpha=0.338 g=0.735 cert=59.52 return=-24.72 (23s)
+[simple_reference/mappo budget=5] alpha=0.209 g=0.930 cert=60.49 return=-24.72 (37s)
+[simple_reference/mappo budget=7] alpha=0.153 g=0.982 cert=60.33 return=-24.72 (50s)
+
+=== ALL DIAGNOSTICS DONE in 13.8 min ===
+CSV saved: /root/autodl-tmp/adavote_exp/results/e2/e2_diagnostics.csv

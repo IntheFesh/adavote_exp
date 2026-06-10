@@ -10,3 +10,12 @@ results/e2/checkpoints/
 
 # OS
 .DS_Store
+
+# AdaVote: exclude large checkpoints, caches, backups
+results/e2/checkpoints/
+*.bak
+*.bak[0-9]
+*.bak_*
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/

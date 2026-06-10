@@ -1,0 +1,180 @@
+nohup: ignoring input
+=== TRAIN simple_spread ippo Thu Jun 11 00:20:51 CST 2026 ===
+[E2 train_committee] env=simple_spread  algo=ippo  n_members=7  timesteps=3,000,000  base_seed=0
+[E2 DIAGNOSTIC] This run produces diagnostic data only. Strict validity comes from E1.
+  Training member 0 (seed=0) ...
+  [member 0] done in 29.0s    saved -> results/e2/checkpoints/simple_spread__ippo__member00__seed0.pkl
+    agent_0: entropy=1.4512  pg_loss=0.0000  vf_loss=15.2747
+    agent_1: entropy=1.4458  pg_loss=-0.0000  vf_loss=16.3319
+    agent_2: entropy=1.4245  pg_loss=-0.0000  vf_loss=16.5288
+  Training member 1 (seed=1) ...
+  [member 1] done in 5.2s    saved -> results/e2/checkpoints/simple_spread__ippo__member01__seed1.pkl
+    agent_0: entropy=1.4465  pg_loss=0.0000  vf_loss=15.2081
+    agent_1: entropy=1.4195  pg_loss=-0.0000  vf_loss=14.7910
+    agent_2: entropy=1.4132  pg_loss=-0.0000  vf_loss=15.1693
+  Training member 2 (seed=2) ...
+  [member 2] done in 5.2s    saved -> results/e2/checkpoints/simple_spread__ippo__member02__seed2.pkl
+    agent_0: entropy=1.4456  pg_loss=-0.0000  vf_loss=13.3891
+    agent_1: entropy=1.4073  pg_loss=-0.0000  vf_loss=14.1600
+    agent_2: entropy=1.4224  pg_loss=-0.0000  vf_loss=14.2195
+  Training member 3 (seed=3) ...
+  [member 3] done in 5.2s    saved -> results/e2/checkpoints/simple_spread__ippo__member03__seed3.pkl
+    agent_0: entropy=1.4307  pg_loss=-0.0000  vf_loss=17.2173
+    agent_1: entropy=1.4376  pg_loss=-0.0000  vf_loss=16.7795
+    agent_2: entropy=1.4467  pg_loss=-0.0000  vf_loss=16.3951
+  Training member 4 (seed=4) ...
+  [member 4] done in 5.2s    saved -> results/e2/checkpoints/simple_spread__ippo__member04__seed4.pkl
+    agent_0: entropy=1.4552  pg_loss=-0.0000  vf_loss=16.4844
+    agent_1: entropy=1.4479  pg_loss=-0.0000  vf_loss=16.0821
+    agent_2: entropy=1.4880  pg_loss=0.0000  vf_loss=16.1814
+  Training member 5 (seed=5) ...
+  [member 5] done in 5.2s    saved -> results/e2/checkpoints/simple_spread__ippo__member05__seed5.pkl
+    agent_0: entropy=1.4148  pg_loss=-0.0000  vf_loss=14.5389
+    agent_1: entropy=1.4322  pg_loss=-0.0000  vf_loss=14.5456
+    agent_2: entropy=1.4455  pg_loss=-0.0000  vf_loss=14.7247
+  Training member 6 (seed=6) ...
+  [member 6] done in 5.2s    saved -> results/e2/checkpoints/simple_spread__ippo__member06__seed6.pkl
+    agent_0: entropy=1.4298  pg_loss=-0.0000  vf_loss=14.2211
+    agent_1: entropy=1.4162  pg_loss=-0.0000  vf_loss=14.4678
+    agent_2: entropy=1.3522  pg_loss=-0.0000  vf_loss=13.7318
+[E2 train_committee] All 7 checkpoints saved to results/e2/checkpoints
+=== TRAIN simple_spread mappo Thu Jun 11 00:21:58 CST 2026 ===
+[E2 train_committee] env=simple_spread  algo=mappo  n_members=7  timesteps=3,000,000  base_seed=0
+[E2 DIAGNOSTIC] This run produces diagnostic data only. Strict validity comes from E1.
+  Training member 0 (seed=0) ...
+  [member 0] done in 28.2s    saved -> results/e2/checkpoints/simple_spread__mappo__member00__seed0.pkl
+    agent_0: actor_loss=-0.0148  critic_loss=18.1111  entropy=1.4807
+    agent_1: actor_loss=-0.0148  critic_loss=18.2506  entropy=1.4788
+    agent_2: actor_loss=-0.0149  critic_loss=18.2381  entropy=1.4858
+  Training member 1 (seed=1) ...
+  [member 1] done in 5.7s    saved -> results/e2/checkpoints/simple_spread__mappo__member01__seed1.pkl
+    agent_0: actor_loss=-0.0144  critic_loss=15.7690  entropy=1.4395
+    agent_1: actor_loss=-0.0143  critic_loss=15.6771  entropy=1.4308
+    agent_2: actor_loss=-0.0146  critic_loss=15.9403  entropy=1.4590
+  Training member 2 (seed=2) ...
+  [member 2] done in 5.7s    saved -> results/e2/checkpoints/simple_spread__mappo__member02__seed2.pkl
+    agent_0: actor_loss=-0.0145  critic_loss=17.0794  entropy=1.4539
+    agent_1: actor_loss=-0.0147  critic_loss=16.9495  entropy=1.4727
+    agent_2: actor_loss=-0.0147  critic_loss=17.1957  entropy=1.4727
+  Training member 3 (seed=3) ...
+  [member 3] done in 5.7s    saved -> results/e2/checkpoints/simple_spread__mappo__member03__seed3.pkl
+    agent_0: actor_loss=-0.0148  critic_loss=16.0041  entropy=1.4763
+    agent_1: actor_loss=-0.0142  critic_loss=16.1700  entropy=1.4226
+    agent_2: actor_loss=-0.0148  critic_loss=15.9270  entropy=1.4750
+  Training member 4 (seed=4) ...
+  [member 4] done in 5.7s    saved -> results/e2/checkpoints/simple_spread__mappo__member04__seed4.pkl
+    agent_0: actor_loss=-0.0142  critic_loss=16.6428  entropy=1.4160
+    agent_1: actor_loss=-0.0143  critic_loss=16.7201  entropy=1.4278
+    agent_2: actor_loss=-0.0148  critic_loss=16.6857  entropy=1.4785
+  Training member 5 (seed=5) ...
+  [member 5] done in 5.7s    saved -> results/e2/checkpoints/simple_spread__mappo__member05__seed5.pkl
+    agent_0: actor_loss=-0.0145  critic_loss=15.8770  entropy=1.4534
+    agent_1: actor_loss=-0.0143  critic_loss=16.0402  entropy=1.4279
+    agent_2: actor_loss=-0.0146  critic_loss=15.8812  entropy=1.4569
+  Training member 6 (seed=6) ...
+  [member 6] done in 5.7s    saved -> results/e2/checkpoints/simple_spread__mappo__member06__seed6.pkl
+    agent_0: actor_loss=-0.0144  critic_loss=16.0876  entropy=1.4360
+    agent_1: actor_loss=-0.0145  critic_loss=15.9780  entropy=1.4489
+    agent_2: actor_loss=-0.0148  critic_loss=15.7179  entropy=1.4835
+[E2 train_committee] All 7 checkpoints saved to results/e2/checkpoints
+=== TRAIN simple_reference ippo Thu Jun 11 00:23:07 CST 2026 ===
+[E2 train_committee] env=simple_reference  algo=ippo  n_members=7  timesteps=3,000,000  base_seed=0
+[E2 DIAGNOSTIC] This run produces diagnostic data only. Strict validity comes from E1.
+  Training member 0 (seed=0) ...
+  [member 0] done in 26.0s    saved -> results/e2/checkpoints/simple_reference__ippo__member00__seed0.pkl
+    agent_0: entropy=3.6954  pg_loss=-0.0000  vf_loss=23.1102
+    agent_1: entropy=3.7010  pg_loss=-0.0000  vf_loss=21.4714
+  Training member 1 (seed=1) ...
+  [member 1] done in 4.0s    saved -> results/e2/checkpoints/simple_reference__ippo__member01__seed1.pkl
+    agent_0: entropy=3.7207  pg_loss=0.0000  vf_loss=21.7139
+    agent_1: entropy=3.7292  pg_loss=-0.0000  vf_loss=22.9603
+  Training member 2 (seed=2) ...
+  [member 2] done in 4.0s    saved -> results/e2/checkpoints/simple_reference__ippo__member02__seed2.pkl
+    agent_0: entropy=3.7135  pg_loss=0.0000  vf_loss=22.0365
+    agent_1: entropy=3.7099  pg_loss=-0.0000  vf_loss=21.1960
+  Training member 3 (seed=3) ...
+  [member 3] done in 4.0s    saved -> results/e2/checkpoints/simple_reference__ippo__member03__seed3.pkl
+    agent_0: entropy=3.7163  pg_loss=0.0000  vf_loss=25.6007
+    agent_1: entropy=3.7283  pg_loss=0.0000  vf_loss=22.5135
+  Training member 4 (seed=4) ...
+  [member 4] done in 4.0s    saved -> results/e2/checkpoints/simple_reference__ippo__member04__seed4.pkl
+    agent_0: entropy=3.7173  pg_loss=0.0000  vf_loss=21.9181
+    agent_1: entropy=3.7066  pg_loss=0.0000  vf_loss=21.3091
+  Training member 5 (seed=5) ...
+  [member 5] done in 4.0s    saved -> results/e2/checkpoints/simple_reference__ippo__member05__seed5.pkl
+    agent_0: entropy=3.7090  pg_loss=-0.0000  vf_loss=21.2645
+    agent_1: entropy=3.6917  pg_loss=-0.0000  vf_loss=20.1379
+  Training member 6 (seed=6) ...
+  [member 6] done in 4.0s    saved -> results/e2/checkpoints/simple_reference__ippo__member06__seed6.pkl
+    agent_0: entropy=3.7056  pg_loss=-0.0000  vf_loss=21.7286
+    agent_1: entropy=3.7155  pg_loss=0.0000  vf_loss=22.2709
+[E2 train_committee] All 7 checkpoints saved to results/e2/checkpoints
+=== TRAIN simple_reference mappo Thu Jun 11 00:24:05 CST 2026 ===
+[E2 train_committee] env=simple_reference  algo=mappo  n_members=7  timesteps=3,000,000  base_seed=0
+[E2 DIAGNOSTIC] This run produces diagnostic data only. Strict validity comes from E1.
+  Training member 0 (seed=0) ...
+  [member 0] done in 25.6s    saved -> results/e2/checkpoints/simple_reference__mappo__member00__seed0.pkl
+    agent_0: actor_loss=-0.0370  critic_loss=18.9849  entropy=3.6993
+    agent_1: actor_loss=-0.0370  critic_loss=17.1764  entropy=3.7023
+  Training member 1 (seed=1) ...
+  [member 1] done in 4.4s    saved -> results/e2/checkpoints/simple_reference__mappo__member01__seed1.pkl
+    agent_0: actor_loss=-0.0372  critic_loss=19.9566  entropy=3.7205
+    agent_1: actor_loss=-0.0372  critic_loss=19.2777  entropy=3.7245
+  Training member 2 (seed=2) ...
+  [member 2] done in 4.4s    saved -> results/e2/checkpoints/simple_reference__mappo__member02__seed2.pkl
+    agent_0: actor_loss=-0.0371  critic_loss=20.4350  entropy=3.7118
+    agent_1: actor_loss=-0.0371  critic_loss=20.5869  entropy=3.7094
+  Training member 3 (seed=3) ...
+  [member 3] done in 4.4s    saved -> results/e2/checkpoints/simple_reference__mappo__member03__seed3.pkl
+    agent_0: actor_loss=-0.0370  critic_loss=20.0350  entropy=3.6984
+    agent_1: actor_loss=-0.0369  critic_loss=19.1223  entropy=3.6921
+  Training member 4 (seed=4) ...
+  [member 4] done in 4.4s    saved -> results/e2/checkpoints/simple_reference__mappo__member04__seed4.pkl
+    agent_0: actor_loss=-0.0369  critic_loss=20.8290  entropy=3.6918
+    agent_1: actor_loss=-0.0370  critic_loss=21.9265  entropy=3.6962
+  Training member 5 (seed=5) ...
+  [member 5] done in 4.4s    saved -> results/e2/checkpoints/simple_reference__mappo__member05__seed5.pkl
+    agent_0: actor_loss=-0.0371  critic_loss=20.5610  entropy=3.7122
+    agent_1: actor_loss=-0.0370  critic_loss=19.6130  entropy=3.6991
+  Training member 6 (seed=6) ...
+  [member 6] done in 4.4s    saved -> results/e2/checkpoints/simple_reference__mappo__member06__seed6.pkl
+    agent_0: actor_loss=-0.0370  critic_loss=22.1446  entropy=3.7006
+    agent_1: actor_loss=-0.0371  critic_loss=21.0538  entropy=3.7075
+[E2 train_committee] All 7 checkpoints saved to results/e2/checkpoints
+=== TRAIN overcooked_v0 ippo Thu Jun 11 00:25:04 CST 2026 ===
+[E2 train_committee] env=overcooked_v0  algo=ippo  n_members=7  timesteps=3,000,000  base_seed=0
+[E2 DIAGNOSTIC] This run produces diagnostic data only. Strict validity comes from E1.
+  Training member 0 (seed=0) ...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/root/autodl-tmp/adavote_exp/e2_jaxmarl/train_committee.py", line 1017, in <module>
+    main()
+  File "/root/autodl-tmp/adavote_exp/e2_jaxmarl/train_committee.py", line 1005, in main
+    train_committee(
+  File "/root/autodl-tmp/adavote_exp/e2_jaxmarl/train_committee.py", line 885, in train_committee
+    params, metrics = train_fn(rng)
+                      ^^^^^^^^^^^^^
+  File "/root/autodl-tmp/adavote_exp/e2_jaxmarl/train_committee.py", line 528, in train
+    (final_params, final_opt, _, _, _), all_metrics = jax.lax.scan(
+                                                      ^^^^^^^^^^^^^
+  File "/root/autodl-tmp/adavote_exp/e2_jaxmarl/train_committee.py", line 503, in _update_step
+    jax.lax.scan(
+  File "/root/autodl-tmp/adavote_exp/e2_jaxmarl/train_committee.py", line 386, in _env_step
+    action, log_prob, value = jax.vmap(_act)(a_obs, act_keys)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/adavote_exp/e2_jaxmarl/train_committee.py", line 381, in _act
+    logits, value = _net.apply(_p, o)
+                    ^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/adavote_exp/e2_jaxmarl/train_committee.py", line 199, in __call__
+    logits = self.actor(obs)
+             ^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/adavote_exp/e2_jaxmarl/train_committee.py", line 169, in __call__
+    x = nn.Dense(h)(x)
+        ^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/conda_envs/e2/lib/python3.11/site-packages/flax/linen/linear.py", line 256, in __call__
+    kernel = self.param(
+             ^^^^^^^^^^^
+flax.errors.ScopeParamShapeError: Initializer expected to generate shape (5, 256) but got shape (26, 256) instead for parameter "kernel" in "/actor/Dense_0". (https://flax.readthedocs.io/en/latest/api_reference/flax.errors.html#flax.errors.ScopeParamShapeError)
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
