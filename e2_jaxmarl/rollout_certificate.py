@@ -200,7 +200,7 @@ def mc_tail_return_batch(stepped_fn, ref_params, logits_fn, agents, T,
         else:
             joint0[a] = ref_actions_this_t[a]
 
-    state_b = jax.tree_util.tree_map(lambda x: jnp.stack([x] * K), state0)
+    state_b = jax.tree_util.tree_map(lambda x: jnp.broadcast_to(x, (K,) + x.shape), state0)
     joint0_b = {a: jnp.full((K,), v, dtype=jnp.int32) for a, v in joint0.items()}
 
     rng, key0 = jax.random.split(rng)
