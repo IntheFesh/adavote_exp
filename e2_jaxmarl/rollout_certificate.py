@@ -281,6 +281,9 @@ def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
     for K in k_grid:
         jax_rng, k_key = jax.random.split(jax_rng)
         X = np.zeros(m)
+        X_swing_only = np.zeros(m)  # nH * clip_pos(Qref_hat-Qfb_hat) * F, NO rad added
+        raw_swings = []             # clip_pos(Qref_hat-Qfb_hat), per failed unit (unscaled)
+        tail_stds = []              # (std of ref_samples, std of fb_samples) per failed unit
         for j, (ti, u) in enumerate(sampled):
             if u["F"] == 0:
                 continue
@@ -297,15 +300,31 @@ def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
             Qfb_hat = float(fb_samples.mean())
             w_fb_plus = wfb_plus_from_rollouts(Qref_hat, Qfb_hat, K, delta_prime, B_Q)
             X[j] = nH * w_fb_plus * 1.0
+            swing = float(clip_pos(np.asarray(Qref_hat - Qfb_hat)))
+            X_swing_only[j] = nH * swing
+            raw_swings.append(swing)
+            tail_stds.append((float(ref_samples.std(ddof=1)), float(fb_samples.std(ddof=1))))
 
         Bhat = empirical_bernstein(X, delta_B, b0)
         Bhat_capped = min(Rmax_hat, Bhat)
+        X_bar = float(X.mean())
+        X_var = float(X.var(ddof=0))
+        swing_only_mean_scaled = float(X_swing_only.mean())  # = nH * mean(swing*F), no rad -- this IS C2_emp
+        mean_raw_swing = float(np.mean(raw_swings)) if raw_swings else float("nan")
+        mean_ref_std = float(np.mean([s[0] for s in tail_stds])) if tail_stds else float("nan")
+        mean_fb_std = float(np.mean([s[1] for s in tail_stds])) if tail_stds else float("nan")
         results[K] = dict(Bhat=Bhat, Bhat_capped=Bhat_capped, Rmax=Rmax_hat,
                            ratio_Rmax=Bhat / Rmax_hat, ratio_Rmax_capped=Bhat_capped / Rmax_hat,
-                           m_F=m_F, delta_prime=delta_prime)
+                           m_F=m_F, delta_prime=delta_prime,
+                           X_bar=X_bar, X_var=X_var,
+                           C2_emp=swing_only_mean_scaled, C2_emp_over_Rmax=swing_only_mean_scaled / Rmax_hat,
+                           mean_raw_swing=mean_raw_swing,
+                           mean_ref_tail_std=mean_ref_std, mean_fb_tail_std=mean_fb_std)
         print(f"[rollout_certificate] K={K:4d}  Bhat={Bhat:.4f}  Bhat_capped={Bhat_capped:.4f}  "
               f"Rmax={Rmax_hat:.4f}  Bhat/Rmax={Bhat/Rmax_hat:.4f}  "
-              f"(cap {'ACTIVE' if Bhat > Rmax_hat else 'inactive'})")
+              f"(cap {'ACTIVE' if Bhat > Rmax_hat else 'inactive'})  "
+              f"C2_emp={swing_only_mean_scaled:.4f} (={swing_only_mean_scaled/Rmax_hat:.4f}*Rmax)  "
+              f"mean_raw_swing={mean_raw_swing:.4f}  mean_ref_tail_std={mean_ref_std:.4f}  mean_fb_tail_std={mean_fb_std:.4f}")
 
     return dict(env=env_name, algo=algo, N=N, n=n, T=T, m=m, m_F=m_F,
                 delta_B=delta_B, delta_G=delta_G, delta_r_hat=delta_r_hat,
