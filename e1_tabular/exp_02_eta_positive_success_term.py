@@ -107,13 +107,15 @@ def main():
     fig, ax = new_fig()
     etas_x = ETAS
     ax.plot(etas_x, [rate_fail[e] for e in etas_x],
-            marker="o", label="pure-failure (cert_failure_only)")
+            marker="o", label=r"$nH\,\mathbb{E}[g \cdot W_{fb}]$  (failure-only)")
     ax.plot(etas_x, [rate_succ[e] for e in etas_x],
-            marker="s", linestyle="--", label="success-inclusive")
+            marker="s", linestyle="--",
+            label=r"$nH\,\mathbb{E}[(1-g)w_\psi + g \cdot W_{fb}]$  (success-inclusive)")
     ax.set_xlabel(r"$\eta$")
     ax.set_ylabel("violation rate  (fraction of games)")
-    ax.set_title(r"exp_02  pure-failure vs success-inclusive ($\eta > 0$)")
+    ax.set_title(r"$\eta = 0$ boundary: pure-failure term validity")
     ax.legend()
+    fig.savefig(fig_path("eta_success_term_violation.pdf"), format="pdf", bbox_inches="tight")
     save_pdf(fig, fig_path("exp_02_violation_rate.pdf"))
 
     # --- PASS/FAIL ---

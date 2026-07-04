@@ -191,12 +191,12 @@ def main():
     for ai, agent in enumerate(agents):
         vals = np.array([bucket_score_sum.get((t, agent), 0.0) / max(bucket_count.get((t, agent), 1), 1)
                           for t in range(T)])
-        ax.bar(range(T), vals, bottom=bottom, label=agent, color=colors[ai % len(colors)])
+        ax.bar(range(T), vals, bottom=bottom, label=agent.replace("_", " "), color=colors[ai % len(colors)])
         bottom += vals
     ax.set_xlabel("timestep t")
-    ax.set_ylabel(r"mean risk score  $\bar{g}(u) \cdot \bar{W}_{fb}(u)$")
-    ax.set_title("Route 3 (operational demo): risk attribution by timestep and agent\n"
-                 "NOT a validity claim -- monitoring/hardening use only")
+    ax.set_ylabel(r"mean risk score  $\bar{\mu}(u) \cdot \bar{g}(u) \cdot \bar{W}_{fb}(u)$")
+    ax.set_title("Risk attribution by timestep and agent\n"
+                 "monitoring/hardening use only — not a validity claim")
     ax.legend(fontsize=8, ncol=n)
     save_pdf(fig, fig_path("route3_risk_by_timestep_agent.pdf"))
 
