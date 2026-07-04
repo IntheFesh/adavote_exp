@@ -182,7 +182,24 @@ def deploy_episode(env, members, ref_member, logits_fn, T, rng):
     return timestep_info, units, team_return, all_rewards
 
 
-def mc_tail_return_batch(stepped_fn, ref_params, logits_fn, agents, T,
+def build_ref_logits_batch_fn(logits_fn, ref_params, agents):
+    """Pre-JIT-compile a vmapped greedy-action function per agent, ONCE, so
+    it is compiled a single time and reused across every subsequent call
+    (every timestep x every unit x every tail x every K value), instead of
+    retracing a fresh un-jitted `jax.vmap(lambda ...)` on every call (which
+    was a severe performance bug: each retrace pays full Python-level
+    tracing + Flax dtype-canonicalization overhead, confirmed via py-spy
+    process dumps showing the process stuck inside `flax` trace machinery).
+    """
+    fns = {}
+    for agent in agents:
+        def _logits_for_agent(o, _agent=agent):
+            return logits_fn(ref_params, _agent, o)
+        fns[agent] = jax.jit(jax.vmap(_logits_for_agent))
+    return fns
+
+
+def mc_tail_return_batch(stepped_fn, ref_logits_batch_fn, agents, T,
                           state0, t0, agent_idx, coordinate_action,
                           prefix_actions, ref_actions_this_t, K, rng):
     """K parallel resettable rollouts: apply the hypothetical joint action at
@@ -211,7 +228,7 @@ def mc_tail_return_batch(stepped_fn, ref_params, logits_fn, agents, T,
     for t in range(t0 + 1, T):
         actions_b = {}
         for a in agents:
-            logits_b = jax.vmap(lambda o: logits_fn(ref_params, a, o))(obs_b[a])
+            logits_b = ref_logits_batch_fn[a](obs_b[a])
             actions_b[a] = jnp.argmax(logits_b, axis=-1).astype(jnp.int32)
         rng, key_t = jax.random.split(rng)
         keys_t = jax.random.split(key_t, K)
@@ -231,6 +248,7 @@ def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
     n = len(agents)
     N = len(members)
     stepped_fn = jax.jit(jax.vmap(env.step))
+    ref_logits_batch_fn = build_ref_logits_batch_fn(logits_fn, members[ref_member]["params"], agents)
 
     master_rng = np.random.default_rng(seed)
     jax_rng = jax.random.PRNGKey(seed)
@@ -290,11 +308,11 @@ def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
                 continue
             k_key, ref_key, fb_key = jax.random.split(k_key, 3)
             ref_samples = mc_tail_return_batch(
-                stepped_fn, members[ref_member]["params"], logits_fn, agents, T,
+                stepped_fn, ref_logits_batch_fn, agents, T,
                 ti["state_before"], u["t"], u["i"], ti["ref_actions"][u["agent"]],
                 ti["joint_action_executed"], ti["ref_actions"], K, ref_key)
             fb_samples = mc_tail_return_batch(
-                stepped_fn, members[ref_member]["params"], logits_fn, agents, T,
+                stepped_fn, ref_logits_batch_fn, agents, T,
                 ti["state_before"], u["t"], u["i"], u["a_fb"],
                 ti["joint_action_executed"], ti["ref_actions"], K, fb_key)
             Qref_hat = float(ref_samples.mean())
