@@ -540,3 +540,42 @@ def delta_prime_union(delta_G: float, m_F: int) -> float:
     if m_F <= 0:
         return 1.0
     return float(delta_G / (2.0 * m_F))
+
+
+def rad_empirical_bernstein(K: int, delta_prime: float, B_Q: float, sigma2_hat: float) -> float:
+    """Empirical-Bernstein one-sided confidence radius for a K-sample mean of
+    a random variable bounded within a range of width B_Q (Maurer & Pontil,
+    2009 form -- the same functional form as `empirical_bernstein` above,
+    applied per-tail with K resettable rollouts):
+
+        rad_EB(K, δ') = sqrt(2 σ̂² ln(2/δ') / K) + 7 B_Q ln(2/δ') / (3(K-1)).
+
+    Remark 6 in the paper notes empirical Bernstein may replace Hoeffding to
+    sharpen rad(K,δ') at variance-dependent rates: when the true tail-return
+    variance sigma2_hat is small relative to B_Q^2 (e.g. near-deterministic
+    dynamics under a greedy policy), this radius is much tighter than
+    `rad_hoeffding`, and its dominant (bias) term decays as 1/K rather than
+    1/sqrt(K).
+    """
+    assert K >= 2, "empirical-Bernstein needs K >= 2"
+    L = np.log(2.0 / delta_prime)
+    return float(np.sqrt(2.0 * sigma2_hat * L / K) + 7.0 * B_Q * L / (3.0 * (K - 1)))
+
+
+def wfb_plus_from_rollouts_eb(
+    Qref_hat: float, Qfb_hat: float, K: int, delta_prime: float, B_Q: float,
+    sigma2_ref: float, sigma2_fb: float,
+) -> float:
+    """Empirical-Bernstein variant of `wfb_plus_from_rollouts`: replaces the
+    shared Hoeffding radius with two (potentially different) per-tail
+    empirical-Bernstein radii, one for each tail's own measured variance:
+
+        W_fb^+_EB(u) = [ Q̂^ref − Q̂^fb ]_+ + rad_EB(K,δ',B_Q,σ̂²_ref) + rad_EB(K,δ',B_Q,σ̂²_fb).
+
+    Each one-sided EB event (Q̂^ref ≥ Q^ref − rad_EB_ref, Q̂^fb ≤ Q^fb + rad_EB_fb)
+    holds with probability ≥ 1−δ' individually, matching Theorem 4's union
+    bound over 2 tails × m_F logged units at δ' = δ_G/(2 m_F).
+    """
+    rad_ref = rad_empirical_bernstein(K, delta_prime, B_Q, sigma2_ref)
+    rad_fb = rad_empirical_bernstein(K, delta_prime, B_Q, sigma2_fb)
+    return float(clip_pos(np.asarray(Qref_hat - Qfb_hat)) + rad_ref + rad_fb)

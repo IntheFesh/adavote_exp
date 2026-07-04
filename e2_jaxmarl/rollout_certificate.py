@@ -56,7 +56,8 @@ from typing import Any, Dict, List
 import numpy as np
 
 from common.certificates import (
-    wfb_plus_from_rollouts, delta_prime_union, empirical_bernstein, clip_pos,
+    wfb_plus_from_rollouts, wfb_plus_from_rollouts_eb, delta_prime_union,
+    empirical_bernstein, clip_pos,
 )
 
 _JAX_AVAILABLE = False
@@ -221,7 +222,7 @@ def mc_tail_return_batch(stepped_fn, ref_params, logits_fn, agents, T,
 
 
 def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
-                       delta_B, delta_G, T, seed):
+                       delta_B, delta_G, T, seed, use_eb=False):
     _require_jax()
     env = jaxmarl_make(_resolve_env_name(env_name))
     members = load_committee(checkpoints_dir, env_name, algo)
@@ -298,7 +299,13 @@ def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
                 ti["joint_action_executed"], ti["ref_actions"], K, fb_key)
             Qref_hat = float(ref_samples.mean())
             Qfb_hat = float(fb_samples.mean())
-            w_fb_plus = wfb_plus_from_rollouts(Qref_hat, Qfb_hat, K, delta_prime, B_Q)
+            if use_eb:
+                sigma2_ref = float(ref_samples.var(ddof=1))
+                sigma2_fb = float(fb_samples.var(ddof=1))
+                w_fb_plus = wfb_plus_from_rollouts_eb(
+                    Qref_hat, Qfb_hat, K, delta_prime, B_Q, sigma2_ref, sigma2_fb)
+            else:
+                w_fb_plus = wfb_plus_from_rollouts(Qref_hat, Qfb_hat, K, delta_prime, B_Q)
             X[j] = nH * w_fb_plus * 1.0
             swing = float(clip_pos(np.asarray(Qref_hat - Qfb_hat)))
             X_swing_only[j] = nH * swing
@@ -344,16 +351,21 @@ def main():
     ap.add_argument("--delta_G", type=float, default=0.05)
     ap.add_argument("--T", type=int, default=25)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--use_eb", action="store_true", default=False,
+                     help="use per-unit empirical-Bernstein radius (Remark 6) instead of Hoeffding")
+    ap.add_argument("--out_suffix", default="")
     args = ap.parse_args()
 
     k_grid = [int(x) for x in args.k_grid.split(",")]
     res = run_certification(args.env, args.algo, args.checkpoints_dir, args.ref_member,
-                             args.m, k_grid, args.delta_B, args.delta_G, args.T, args.seed)
+                             args.m, k_grid, args.delta_B, args.delta_G, args.T, args.seed,
+                             use_eb=args.use_eb)
+    res["use_eb"] = args.use_eb
 
     import json
     out_dir = "results/e2"
     os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, f"rollout_certificate_{args.env}_{args.algo}.json")
+    out_path = os.path.join(out_dir, f"rollout_certificate_{args.env}_{args.algo}{args.out_suffix}.json")
     with open(out_path, "w") as f:
         json.dump(res, f, indent=2, default=str)
     print(f"\n[rollout_certificate] {DIAG}")
