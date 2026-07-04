@@ -502,3 +502,41 @@ def estimator_samples(
             raise ValueError(variant)
         X[j] = nH * w * F
     return X
+
+
+# --------------------------------------------------------------------------- #
+# Conservative rollout value bound (Theorem 4) — shared math, reused by both
+# E1 (tabular Monte-Carlo tail simulation) and E2 (real-environment rollouts).
+# --------------------------------------------------------------------------- #
+def rad_hoeffding(K: int, delta_prime: float, B_Q: float) -> float:
+    """Hoeffding confidence radius  rad(K, δ') = B_Q · sqrt( ln(2/δ') / (2K) )."""
+    return float(B_Q * np.sqrt(np.log(2.0 / delta_prime) / (2.0 * K)))
+
+
+def wfb_plus_from_rollouts(
+    Qref_hat: float, Qfb_hat: float, K: int, delta_prime: float, B_Q: float
+) -> float:
+    """Theorem 4 conservative fallback-swing bound from K-rollout Q estimates.
+
+        W_fb^+(u) = [ Q̂^ref(u,a^ref) − Q̂^fb(u,a^fb) ]_+ + 2·rad(K, δ').
+
+    Q̂^ref, Q̂^fb are empirical means of K independent resettable rollouts each
+    (reference tail / fallback-then-reference tail).  Under Hoeffding's
+    inequality per tail (union bound over the two tails, and over all logged
+    failed units via δ' = δ_G / (2 m_F)), this dominates the true coordinate
+    swing Δ_+(u, a^fb) jointly with probability ≥ 1 − δ_G (Theorem 4).
+    """
+    rad = rad_hoeffding(K, delta_prime, B_Q)
+    return float(clip_pos(np.asarray(Qref_hat - Qfb_hat)) + 2.0 * rad)
+
+
+def delta_prime_union(delta_G: float, m_F: int) -> float:
+    """Per-tail-event confidence budget δ' = δ_G / (2 m_F) (Theorem 4).
+
+    m_F is the number of logged failed units in the certification batch; the
+    union bound is over the 2 tails (reference, fallback) of each such unit.
+    m_F=0 (no failures logged) returns 1.0 (no radius needed / unused).
+    """
+    if m_F <= 0:
+        return 1.0
+    return float(delta_G / (2.0 * m_F))

@@ -271,7 +271,7 @@ def main():
     ax.axhline(1.0, color="k", ls=":", lw=0.8)
     ax.set_xlabel("number of agents $n$")
     ax.set_ylabel(r"true / marginal cert ratio")
-    ax.set_title(r"exp_04  marginal-cert amplification: true/marginal $= (1-g)+ng$")
+    ax.set_title(r"Marginal-certificate amplification")
     ax.legend(fontsize=9)
     pdf_path = fig_path("exp_04_marginal_fails.pdf")
     save_pdf(fig, pdf_path)
