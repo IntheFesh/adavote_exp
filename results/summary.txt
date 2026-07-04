@@ -11,3 +11,5 @@ exp_10 eligibility [PASS] iff_violations=0[PASS] alpha03_increasing=True[PASS] n
 exp_11 wrapper_vs_naive [PASS] eta0_unit_mismatches=0/6400 max_exec_diff=4.43e-10 max_g_diff=9.08e-10 rel_gap(eta=0)=0.00e+00 rel_gap(eta=0.3)=0.167 monotone_in_eta=True
 exp_10b anchored_eligibility [PASS] anchored_sign_violations=0 unanchored_violations=0 mc_max_err=0.00157 n_N=10
 exp_09b occupancy_coupling [PASS] identity_max_resid=5.94e-16 T_fail_all_nonpos=True cert_rise_eq_occ_dom=True overall_cert_rise_rate=0.074 (b)_verdict=VACUOUS sat_margin_threshold=none events_above_threshold=0 n_events=3000
+exp_12 rollout_bridge [PASS] validity_ok=True monotone_tightening=True  K=25:rate=1.000  K=50:rate=1.000  K=100:rate=1.000  K=200:rate=1.000  K=400:rate=1.000  |  K=25:B/L=15.36,B/Rmax=1.53  K=50:B/L=11.44,B/Rmax=1.14  K=100:B/L=8.55,B/Rmax=0.85  K=200:B/L=6.46,B/Rmax=0.64  K=400:B/L=5.07,B/Rmax=0.50
+exp_13 structured_validity [PASS] n_grid=[2, 3, 4, 5, 6, 7] total_games=315 chain_violations=0 joint_violations=0 naive_violations=14 median C0/L=24.30 C1/L=1.74 C2/L=1.01
