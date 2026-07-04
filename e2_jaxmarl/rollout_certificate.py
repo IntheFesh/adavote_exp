@@ -116,7 +116,30 @@ def plurality_action(proposals: np.ndarray, A: int) -> int:
     return int(np.argmax(counts))
 
 
-def deploy_episode(env, members, ref_member, logits_fn, T, rng):
+def build_single_logits_fn(logits_fn, agents):
+    """Pre-JIT-compile a single-sample greedy-logits function per agent, with
+    PARAMS as an explicit traced argument (not closed over). Because every
+    committee member shares the same network architecture (same param
+    pytree shape), this ONE compiled function is reused across the
+    reference member AND all advisors -- not just the reference tail.
+
+    Without this, deploy_episode called `logits_fn(params, agent, obs)`
+    directly (un-jitted) T x n_agents x N_members times PER EPISODE (150
+    episodes x 25 steps x 3 agents x 5 members = 56,250 eager Flax calls),
+    which was the dominant remaining bottleneck after fixing the rollout
+    tail's dispatch (confirmed via microbenchmark: isolated rollout-tail
+    dispatch cost only ~15s/K-value at full scale, yet full runs still took
+    10+ minutes -- the gap was this unjitted deployment-phase path).
+    """
+    fns = {}
+    for agent in agents:
+        def _logits(params, o, _agent=agent):
+            return logits_fn(params, _agent, o)
+        fns[agent] = jax.jit(_logits)
+    return fns
+
+
+def deploy_episode(env, members, ref_member, single_logits_fn, jitted_step, T, rng):
     """One deployment episode under the actual agreement-gated committee
     controller (eta=0, plurality-vote fallback). Returns:
       timestep_info: list of dicts per t (state_before, obs_before,
@@ -145,14 +168,14 @@ def deploy_episode(env, members, ref_member, logits_fn, T, rng):
         ref_actions_this_t = {}
         for agent in agents:
             o = jnp.asarray(obs_before[agent])
-            ref_actions_this_t[agent] = int(jnp.argmax(logits_fn(ref_params, agent, o)))
+            ref_actions_this_t[agent] = int(jnp.argmax(single_logits_fn[agent](ref_params, o)))
 
         joint_action = {}
         for i, agent in enumerate(agents):
             o = jnp.asarray(obs_before[agent])
             proposals = [ref_actions_this_t[agent]]
             for op in other_params:
-                proposals.append(int(jnp.argmax(logits_fn(op, agent, o))))
+                proposals.append(int(jnp.argmax(single_logits_fn[agent](op, o))))
             proposals = np.array(proposals)
             n_endorse = int(np.sum(proposals == ref_actions_this_t[agent]))
             F = 1 if n_endorse <= N // 2 else 0
@@ -172,7 +195,7 @@ def deploy_episode(env, members, ref_member, logits_fn, T, rng):
 
         rng, sk = jax.random.split(rng)
         actions_j = {a: jnp.asarray(joint_action[a]) for a in agents}
-        obs, state, reward, done, info = env.step(sk, state_before, actions_j)
+        obs, state, reward, done, info = jitted_step(sk, state_before, actions_j)
         r = float(np.mean([float(reward[a]) for a in agents]))
         team_return += r
         all_rewards.append(r)
@@ -249,6 +272,8 @@ def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
     N = len(members)
     stepped_fn = jax.jit(jax.vmap(env.step))
     ref_logits_batch_fn = build_ref_logits_batch_fn(logits_fn, members[ref_member]["params"], agents)
+    single_logits_fn = build_single_logits_fn(logits_fn, agents)
+    jitted_step = jax.jit(env.step)
 
     master_rng = np.random.default_rng(seed)
     jax_rng = jax.random.PRNGKey(seed)
@@ -263,7 +288,7 @@ def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
     for j in range(m):
         jax_rng, ep_key = jax.random.split(jax_rng)
         timestep_info, units, team_return, ep_rewards = deploy_episode(
-            env, members, ref_member, logits_fn, T, ep_key)
+            env, members, ref_member, single_logits_fn, jitted_step, T, ep_key)
         all_rewards.extend(ep_rewards)
         returns.append(team_return)
         actual_T = len(timestep_info)
