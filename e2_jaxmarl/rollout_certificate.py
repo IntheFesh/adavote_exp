@@ -1,19 +1,32 @@
 """
 e2_jaxmarl/rollout_certificate.py — Pilot A / Route 2: Theorem-4 conservative
-rollout value bound + Theorem-3 finite-sample certificate, instantiated on a
-REAL environment (MPE) via actual resettable Monte-Carlo rollouts.
+rollout value bound (CORRECTED, conditional-mean / Jensen estimator) +
+Theorem-3 finite-sample certificate, instantiated on a REAL environment (MPE)
+via actual resettable Monte-Carlo rollouts.
+
+*** ESTIMATOR CORRECTION (supersedes the previous Hoeffding/EB-radius
+version) *** -- see e1_tabular/exp_12_rollout_bridge.py's docstring and
+common/certificates.py's "Conditional-mean conservative estimator" section
+for the full derivation. In short: the per-unit swing estimate is now
+W_tilde(u) = [Q_hat^ref - Q_hat^fb]_+ (no confidence-radius bump, no delta_G,
+no delta', no per-unit union bound over m_F). Conditional Jensen
+(convexity of [.]_+ plus unbiasedness of the K-rollout means) gives
+E[W_tilde | u,F=1,a_fb] >= Delta_+(u,a_fb) UNCONDITIONALLY, so
+E[X_j] >= C2 >= L at the population level, and Theorem 3's
+empirical-Bernstein concentration over the m i.i.d. draws of X_j (delta_B
+only) is the sole probabilistic layer.
 
 This is NOT eval_committee.py's critic-based diagnostic (which only estimates
 endorsement-rate stability using a one-step log-prob-gap proxy for Q). This
 script actually DEPLOYS the agreement-gated committee controller on MPE and
-computes a certificate whose validity is BY CONSTRUCTION (Theorem 4 + Theorem
-3), the same as Assumption 2 discharged exactly, with NO exact-DP and NO
-learned critic anywhere in the loop -- only resettable rollouts.
+computes a certificate whose validity follows from Theorem 4 (corrected) +
+Theorem 3, with NO exact-DP and NO learned critic anywhere in the loop --
+only resettable rollouts.
 
 Reuses the EXACT SAME shared math as e1_tabular/exp_12_rollout_bridge.py
-(common.certificates.wfb_plus_from_rollouts / rad_hoeffding /
-delta_prime_union / empirical_bernstein), so Route 1 (tabular) and Route 2
-(MPE) certificates are computed by identical formulas.
+(common.certificates.wtilde_jensen_from_rollouts / empirical_bernstein), so
+Route 1 (tabular) and Route 2 (MPE) certificates are computed by identical
+formulas.
 
 HONESTY BOUNDARY (see repo README / task brief):
   - MPE has no ground truth (no exact DP), so this certificate can be
@@ -56,7 +69,7 @@ from typing import Any, Dict, List
 import numpy as np
 
 from common.certificates import (
-    wfb_plus_from_rollouts, wfb_plus_from_rollouts_eb, delta_prime_union,
+    wtilde_jensen_from_rollouts, jensen_population_bound_K,
     empirical_bernstein, clip_pos,
 )
 
@@ -262,7 +275,7 @@ def mc_tail_return_batch(stepped_fn, ref_logits_batch_fn, agents, T,
 
 
 def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
-                       delta_B, delta_G, T, seed, use_eb=False):
+                       delta_B, T, seed):
     _require_jax()
     env = jaxmarl_make(_resolve_env_name(env_name))
     members = load_committee(checkpoints_dir, env_name, algo)
@@ -319,14 +332,15 @@ def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
     nH = n * T
     b0 = nH * B_Q
     m_F = n_fail_logged
-    delta_prime = delta_prime_union(delta_G, m_F)
+    L_delta_B = np.log(2.0 / delta_B)  # shared by the variance/range decomposition below
 
     results = {}
     for K in k_grid:
         jax_rng, k_key = jax.random.split(jax_rng)
-        X = np.zeros(m)
-        X_swing_only = np.zeros(m)  # nH * clip_pos(Qref_hat-Qfb_hat) * F, NO rad added
-        raw_swings = []             # clip_pos(Qref_hat-Qfb_hat), per failed unit (unscaled)
+        X = np.zeros(m)              # nH * F_j * W_tilde_j (Jensen estimator, NO rad)
+        X_exact_cap_check = np.zeros(m)  # unclipped clip_pos(Qref_hat-Qfb_hat), to confirm the
+                                          # B_Q cap in wtilde_jensen_from_rollouts never binds
+        raw_swings = []             # W_tilde per failed unit (unscaled)
         tail_stds = []              # (std of ref_samples, std of fb_samples) per failed unit
         for j, (ti, u) in enumerate(sampled):
             if u["F"] == 0:
@@ -342,42 +356,50 @@ def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
                 ti["joint_action_executed"], ti["ref_actions"], K, fb_key)
             Qref_hat = float(ref_samples.mean())
             Qfb_hat = float(fb_samples.mean())
-            if use_eb:
-                sigma2_ref = float(ref_samples.var(ddof=1))
-                sigma2_fb = float(fb_samples.var(ddof=1))
-                w_fb_plus = wfb_plus_from_rollouts_eb(
-                    Qref_hat, Qfb_hat, K, delta_prime, B_Q, sigma2_ref, sigma2_fb)
-            else:
-                w_fb_plus = wfb_plus_from_rollouts(Qref_hat, Qfb_hat, K, delta_prime, B_Q)
-            X[j] = nH * w_fb_plus * 1.0
-            swing = float(clip_pos(np.asarray(Qref_hat - Qfb_hat)))
-            X_swing_only[j] = nH * swing
-            raw_swings.append(swing)
+            w_tilde = wtilde_jensen_from_rollouts(Qref_hat, Qfb_hat, B_Q)
+            X[j] = nH * w_tilde
+            X_exact_cap_check[j] = nH * float(clip_pos(np.asarray(Qref_hat - Qfb_hat)))
+            raw_swings.append(w_tilde)
             tail_stds.append((float(ref_samples.std(ddof=1)), float(fb_samples.std(ddof=1))))
+
+        assert np.allclose(X, X_exact_cap_check), (
+            "B_Q cap bound in wtilde_jensen_from_rollouts unexpectedly active -- "
+            "Qref_hat/Qfb_hat may have escaped [0,B_Q], which should not happen "
+            "for returns bounded in that range.")
 
         Bhat = empirical_bernstein(X, delta_B, b0)
         Bhat_capped = min(Rmax_hat, Bhat)
         X_bar = float(X.mean())
         X_var = float(X.var(ddof=0))
-        swing_only_mean_scaled = float(X_swing_only.mean())  # = nH * mean(swing*F), no rad -- this IS C2_emp
+        # Explicit Theorem-3 decomposition: Bhat = Xbar + variance_term + range_term
+        variance_term = float(np.sqrt(2.0 * X_var * L_delta_B / m))
+        range_term = float(7.0 * b0 * L_delta_B / (3.0 * (m - 1)))
+        jensen_pop_bound = jensen_population_bound_K(nH, B_Q, K)
         mean_raw_swing = float(np.mean(raw_swings)) if raw_swings else float("nan")
         mean_ref_std = float(np.mean([s[0] for s in tail_stds])) if tail_stds else float("nan")
         mean_fb_std = float(np.mean([s[1] for s in tail_stds])) if tail_stds else float("nan")
         results[K] = dict(Bhat=Bhat, Bhat_capped=Bhat_capped, Rmax=Rmax_hat,
                            ratio_Rmax=Bhat / Rmax_hat, ratio_Rmax_capped=Bhat_capped / Rmax_hat,
-                           m_F=m_F, delta_prime=delta_prime,
+                           range_cap_active=bool(Bhat > Rmax_hat),
+                           m_F=m_F,
                            X_bar=X_bar, X_var=X_var,
-                           C2_emp=swing_only_mean_scaled, C2_emp_over_Rmax=swing_only_mean_scaled / Rmax_hat,
+                           variance_term=variance_term, range_term=range_term,
+                           X_bar_over_Rmax=X_bar / Rmax_hat,
+                           variance_term_over_Rmax=variance_term / Rmax_hat,
+                           range_term_over_Rmax=range_term / Rmax_hat,
+                           jensen_pop_bound=jensen_pop_bound,
                            mean_raw_swing=mean_raw_swing,
                            mean_ref_tail_std=mean_ref_std, mean_fb_tail_std=mean_fb_std)
         print(f"[rollout_certificate] K={K:4d}  Bhat={Bhat:.4f}  Bhat_capped={Bhat_capped:.4f}  "
               f"Rmax={Rmax_hat:.4f}  Bhat/Rmax={Bhat/Rmax_hat:.4f}  "
               f"(cap {'ACTIVE' if Bhat > Rmax_hat else 'inactive'})  "
-              f"C2_emp={swing_only_mean_scaled:.4f} (={swing_only_mean_scaled/Rmax_hat:.4f}*Rmax)  "
+              f"Xbar={X_bar:.4f} (={X_bar/Rmax_hat:.4f}*Rmax)  "
+              f"variance_term={variance_term:.4f} range_term={range_term:.4f}  "
+              f"jensen_pop_bound(K)={jensen_pop_bound:.4f}  "
               f"mean_raw_swing={mean_raw_swing:.4f}  mean_ref_tail_std={mean_ref_std:.4f}  mean_fb_tail_std={mean_fb_std:.4f}")
 
     return dict(env=env_name, algo=algo, N=N, n=n, T=T, m=m, m_F=m_F,
-                delta_B=delta_B, delta_G=delta_G, delta_r_hat=delta_r_hat,
+                delta_B=delta_B, delta_r_hat=delta_r_hat, estimator="jensen_conditional_mean",
                 Rmax_hat=Rmax_hat, mean_return=float(np.mean(returns)),
                 alpha_hat_endorse=alpha_hat_endorse, per_K=results)
 
@@ -391,19 +413,14 @@ def main():
     ap.add_argument("--m", type=int, default=200, help="certification episodes")
     ap.add_argument("--k_grid", default="100,200,400,800")
     ap.add_argument("--delta_B", type=float, default=0.05)
-    ap.add_argument("--delta_G", type=float, default=0.05)
     ap.add_argument("--T", type=int, default=25)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--use_eb", action="store_true", default=False,
-                     help="use per-unit empirical-Bernstein radius (Remark 6) instead of Hoeffding")
     ap.add_argument("--out_suffix", default="")
     args = ap.parse_args()
 
     k_grid = [int(x) for x in args.k_grid.split(",")]
     res = run_certification(args.env, args.algo, args.checkpoints_dir, args.ref_member,
-                             args.m, k_grid, args.delta_B, args.delta_G, args.T, args.seed,
-                             use_eb=args.use_eb)
-    res["use_eb"] = args.use_eb
+                             args.m, k_grid, args.delta_B, args.T, args.seed)
 
     import json
     out_dir = "results/e2"
