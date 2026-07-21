@@ -61,6 +61,7 @@ import argparse
 
 import numpy as np
 import pandas as pd
+from matplotlib.ticker import NullLocator
 from tqdm import tqdm
 
 from common import certificates as C
@@ -73,6 +74,35 @@ from e1_tabular.rollout_sim import mc_tail_returns_batch
 
 DELTA_B = 0.05
 K_GRID = [25, 50, 100, 200, 400]
+
+
+def bootstrap_median_ci(values, n_boot=2000, alpha=0.05, rng=None):
+    """Percentile-bootstrap 95% CI for the median of `values`. Used for the
+    population-conservatism plot: if the CI at some K straddles 1, a
+    median < 1 there is NOT a significant violation of the (population-level,
+    exact) Jensen guarantee E[Xbar] >= C2 -- just sampling noise on top of an
+    exact-in-expectation quantity."""
+    values = np.asarray(values, dtype=float)
+    values = values[~np.isnan(values)]
+    if rng is None:
+        rng = np.random.default_rng(0)
+    n = len(values)
+    boot_medians = np.empty(n_boot)
+    for b in range(n_boot):
+        sample = values[rng.integers(0, n, size=n)]
+        boot_medians[b] = np.median(sample)
+    lo, hi = np.percentile(boot_medians, [100 * alpha / 2, 100 * (1 - alpha / 2)])
+    return float(np.median(values)), float(lo), float(hi)
+
+
+def clean_log_xaxis(ax, k_grid):
+    """Explicit major ticks at exactly the K values used (25,50,100,200,400
+    are not clean powers of 10), no minor ticks at all -- avoids matplotlib's
+    default log-scale minor ticks (3x10^1, 4x10^1, 6x10^1, ...) cluttering
+    and overlapping the axis."""
+    ax.set_xticks(k_grid)
+    ax.set_xticklabels([str(k) for k in k_grid])
+    ax.xaxis.set_minor_locator(NullLocator())
 BOUND_COMPARISON_K = 400   # fixed rollout budget for the m=5000 bound-type comparison
 BOUND_COMPARISON_M = 5000
 M_SWEEP = [500, 1500, 5000]
@@ -251,17 +281,32 @@ def main():
     print("\nPer-K aggregate (coverage audit is the headline check):")
     print(agg.to_string(float_format=lambda x: f"{x:.4f}"))
 
-    # --- PDF (left, NEW): population conservatism Xbar/C2 vs K ---
+    # --- PDF (left, NEW): population conservatism Xbar/C2 vs K, with 95% bootstrap CI ---
+    boot_rng = np.random.default_rng(args.seed + 1_000_003)
+    xc2_med, xc2_lo, xc2_hi = [], [], []
+    for K in k_grid:
+        vals = df.loc[df.K == K, "ratio_XC2"].values
+        med, lo, hi = bootstrap_median_ci(vals, rng=boot_rng)
+        xc2_med.append(med); xc2_lo.append(lo); xc2_hi.append(hi)
+    xc2_med, xc2_lo, xc2_hi = np.array(xc2_med), np.array(xc2_lo), np.array(xc2_hi)
+    yerr = np.vstack([xc2_med - xc2_lo, xc2_hi - xc2_med])
+
     fig, ax = new_fig()
-    ax.plot(k_grid, agg["median_ratio_XC2"].values, "o-", color="steelblue",
-            label=r"median $\bar{X}/C_2$ (population conservatism)")
-    ax.axhline(1.0, color="k", ls="--", lw=1.0, label="= 1 (Jensen-tight)")
+    ax.errorbar(k_grid, xc2_med, yerr=yerr, fmt="o-", color="steelblue", capsize=4, lw=1.5,
+                label=r"median $\bar{X}/C_2$ (95% bootstrap CI)")
+    ax.axhline(1.0, color="k", ls="--", lw=1.2, label="population target = 1 (Jensen exact)")
     ax.set_xscale("log")
+    clean_log_xaxis(ax, k_grid)
     ax.set_xlabel("rollout budget K")
     ax.set_ylabel(r"median $\bar{X}/C_2$")
-    ax.set_title("Conservative rollout bridge: population conservatism vs K")
-    ax.legend(fontsize=9)
+    ax.set_title("Conservative rollout bridge: population conservatism vs K\n"
+                 "(CI crossing 1 = not significantly below the population target)")
+    ax.legend(fontsize=8)
     save_pdf(fig, fig_path("consbound_rate_vs_K.pdf"))
+    print("\nPopulation conservatism 95% CI per K:")
+    for K, med, lo, hi in zip(k_grid, xc2_med, xc2_lo, xc2_hi):
+        crosses = "crosses 1 (not significant)" if lo <= 1.0 <= hi else "does not cross 1"
+        print(f"  K={K}: median={med:.4f}  CI=[{lo:.4f}, {hi:.4f}]  {crosses}")
 
     # --- PDF (right): tightness vs K ---
     fig, ax = new_fig()
@@ -269,6 +314,7 @@ def main():
     ax.plot(k_grid, agg["median_ratio_Rmax"].values, "s--", color="seagreen", label=r"$\hat{B}_N/R_{max}$")
     ax.axhline(1.0, color="k", ls=":", lw=0.8, label="= 1 (trivial / tight)")
     ax.set_xscale("log")
+    clean_log_xaxis(ax, k_grid)
     ax.set_xlabel("rollout budget K")
     ax.set_ylabel("median tightness ratio")
     ax.set_title("Conservative rollout bridge: tightness vs K")
