@@ -445,14 +445,19 @@ def empirical_bernstein(X: np.ndarray, delta: float, b: float) -> float:
 
         B̂ = X̄ + sqrt(2 σ̂² ln(2/δ) / m) + 7 b ln(2/δ) / (3 (m-1))
 
-    where σ̂² is the (population) sample variance, m=len(X), b is the range
-    bound (X ∈ [0, b]).
+    where σ̂² is the UNBIASED sample variance (ddof=1),
+        σ̂² = (1/(m-1)) Σ_j (X_j - X̄)²
+            = (1/(m(m-1))) Σ_{i<j} (X_i - X_j)²   (equivalent pairwise form),
+    m=len(X), b is the range bound (X ∈ [0, b]). Maurer & Pontil (2009) state
+    the inequality in the pairwise form; using the biased (ddof=0) variance
+    here would understate σ̂² by a factor of (m-1)/m and understate the
+    resulting radius, which is NOT covered by their guarantee.
     """
     X = np.asarray(X, dtype=float)
     m = len(X)
     assert m >= 2, "empirical-Bernstein needs m >= 2"
     xbar = X.mean()
-    var = X.var(ddof=0)
+    var = X.var(ddof=1)
     L = np.log(2.0 / delta)
     return float(xbar + np.sqrt(2.0 * var * L / m) + 7.0 * b * L / (3.0 * (m - 1)))
 

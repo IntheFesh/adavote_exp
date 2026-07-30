@@ -12,10 +12,13 @@ def hoeffding_bound(X, delta, b):
     return float(X.mean() + b * np.sqrt(np.log(1.0/delta) / (2*m)))
 
 def emp_bernstein_bound(X, delta, b):
-    """Empirical-Bernstein (Maurer & Pontil 2009). Matches certificates.empirical_bernstein."""
+    """Empirical-Bernstein (Maurer & Pontil 2009). Matches certificates.empirical_bernstein.
+    Uses the UNBIASED sample variance (ddof=1) -- numpy's .var() defaults to
+    ddof=0 (biased), which understates sigma^2 by (m-1)/m and is not covered
+    by the Maurer-Pontil guarantee."""
     X = np.asarray(X, float); m = len(X)
     L = np.log(2.0/delta)
-    return float(X.mean() + np.sqrt(2*X.var()*L/m) + 7*b*L/(3*(m-1)))
+    return float(X.mean() + np.sqrt(2*X.var(ddof=1)*L/m) + 7*b*L/(3*(m-1)))
 
 def naive_plugin_mean(X, delta, b):
     """Empirical mean only; NO concentration term. Expected to under-cover."""

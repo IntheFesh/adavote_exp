@@ -370,7 +370,10 @@ def run_certification(env_name, algo, checkpoints_dir, ref_member, m, k_grid,
         Bhat = empirical_bernstein(X, delta_B, b0)
         Bhat_capped = min(Rmax_hat, Bhat)
         X_bar = float(X.mean())
-        X_var = float(X.var(ddof=0))
+        X_var = float(X.var(ddof=1))  # unbiased, matches empirical_bernstein's internal
+                                       # variance so this decomposition (Xbar+variance_term+
+                                       # range_term) sums exactly to Bhat; does not itself
+                                       # feed into Bhat (already computed above)
         # Explicit Theorem-3 decomposition: Bhat = Xbar + variance_term + range_term
         variance_term = float(np.sqrt(2.0 * X_var * L_delta_B / m))
         range_term = float(7.0 * b0 * L_delta_B / (3.0 * (m - 1)))
