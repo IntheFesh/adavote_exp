@@ -1,0 +1,34 @@
+{
+  "source_csv": "results/data/exp_a4_adjacent_baselines.csv",
+  "n_games": 8,
+  "repeats": 50,
+  "I2_dual_basis": {
+    "口径_O_oracle": {
+      "definition": "population C2 (common.certificates.cert_Ctilde) / exact-DP true_loss L; no sampling error",
+      "coverage": 1.0,
+      "median_ratio_L": 1.0182777923197879,
+      "adopted_by_paper": false
+    },
+    "口径_B_finite_sample": {
+      "definition": "common.certificates.empirical_bernstein on Pi2 estimator_samples (m=2000) / true_loss L; same finite-sample basis as PDIS/DR",
+      "coverage": 1.0,
+      "median_ratio_L": 1.334045788900909,
+      "adopted_by_paper": true
+    },
+    "decision_ref": "Task 7 §1.2: 口径 O's 1.0183 vs the paper's historical 1.019 is a 0.07% gap, judged coincidental -- 口径 O is a population quantity while PDIS/DR are finite-sample estimates, not the same evaluation basis. Paper table adopts 口径 B for a like-for-like comparison across all four methods."
+  },
+  "other_methods": {
+    "PDIS": {
+      "coverage": 1.0,
+      "median_ratio_L": 1.692098633344822
+    },
+    "DR": {
+      "coverage": 1.0,
+      "median_ratio_L": 2.682424724524702
+    },
+    "robust_sim_lemma": {
+      "coverage": 1.0,
+      "median_ratio_L": 3.8920848952274585
+    }
+  }
+}
