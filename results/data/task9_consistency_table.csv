@@ -1,0 +1,70 @@
+figure,value_desc,value,source,paper_value,match
+chain_ratios_box.pdf,median C0/L,8.531,results/data/exp_01_chain_ordering.csv:r_C0.median(),8.53,True
+chain_ratios_box.pdf,median C1/L,2.04,results/data/exp_01_chain_ordering.csv:r_Cstar.median(),2.04,True
+chain_ratios_box.pdf,median C2/L,1.017,results/data/exp_01_chain_ordering.csv:r_Ctilde.median(),1.02,True
+chain_slack_hist.pdf,slack median,0.0172,results/data/exp_01_chain_ordering.csv:slack_Ctilde.median(),0.017,True
+chain_slack_hist.pdf,slack p95,0.0301,results/data/exp_01_chain_ordering.csv:slack_Ctilde.quantile(0.95),0.03,True
+chain_slack_hist.pdf,slack max (axis range),0.0424,results/data/exp_01_chain_ordering.csv:slack_Ctilde.max(),0.042,True
+estimator_coverage.pdf,"I2 coverage m=500,1500,5000",1.000/1.000/0.9994,"results/data/exp_03_estimator.csv:groupby(Pi2,m).covered.mean()",1.000/1.000/0.9994,n/a
+estimator_coverage.pdf,"I1 coverage m=500,1500,5000",1.000/1.000/1.000,"results/data/exp_03_estimator.csv:groupby(Pi1,m).covered.mean()",1.000/1.000/1.000,n/a
+estimator_bound_comparison.pdf,empirical_bernstein coverage,1.0,results/data/exp_03_bound_types.csv:groupby(empirical_bernstein).covered.mean(),1.0,True
+estimator_bound_comparison.pdf,empirical_bernstein tightness,1.201,results/data/exp_03_bound_types.csv:groupby(empirical_bernstein).ratio_L.median(),1.201,True
+estimator_bound_comparison.pdf,hoeffding coverage,1.0,results/data/exp_03_bound_types.csv:groupby(hoeffding).covered.mean(),1.0,True
+estimator_bound_comparison.pdf,hoeffding tightness,1.396,results/data/exp_03_bound_types.csv:groupby(hoeffding).ratio_L.median(),1.396,True
+estimator_bound_comparison.pdf,clipped_empirical_bernstein coverage,1.0,results/data/exp_03_bound_types.csv:groupby(clipped_empirical_bernstein).covered.mean(),1.0,True
+estimator_bound_comparison.pdf,clipped_empirical_bernstein tightness,1.18,results/data/exp_03_bound_types.csv:groupby(clipped_empirical_bernstein).ratio_L.median(),1.18,True
+estimator_bound_comparison.pdf,naive_plugin coverage,0.65,results/data/exp_03_bound_types.csv:groupby(naive_plugin).covered.mean(),0.65,True
+estimator_bound_comparison.pdf,naive_plugin tightness,1.022,results/data/exp_03_bound_types.csv:groupby(naive_plugin).ratio_L.median(),1.022,True
+consbound_tightness_vs_K.pdf,K=25 median B/L,1.624,results/data/exp_12_rollout_bridge.csv:groupby(K=25).ratio_L.median(),1.624,True
+consbound_tightness_vs_K.pdf,K=25 median B/Rmax,0.148,results/data/exp_12_rollout_bridge.csv:groupby(K=25).ratio_Rmax.median(),0.148,True
+consbound_rate_vs_K.pdf,K=25 median Xbar/C2,0.9982,results/data/exp_12_rollout_bridge.csv:groupby(K=25).ratio_XC2.median(),0.9982,True
+consbound_tightness_vs_K.pdf,K=25 coverage,1.0,results/data/exp_12_rollout_bridge.csv:groupby(K=25).covered.mean(),1.0,True
+consbound_tightness_vs_K.pdf,K=50 median B/L,1.637,results/data/exp_12_rollout_bridge.csv:groupby(K=50).ratio_L.median(),1.637,True
+consbound_tightness_vs_K.pdf,K=50 median B/Rmax,0.149,results/data/exp_12_rollout_bridge.csv:groupby(K=50).ratio_Rmax.median(),0.149,True
+consbound_rate_vs_K.pdf,K=50 median Xbar/C2,1.0124,results/data/exp_12_rollout_bridge.csv:groupby(K=50).ratio_XC2.median(),1.0124,True
+consbound_tightness_vs_K.pdf,K=50 coverage,1.0,results/data/exp_12_rollout_bridge.csv:groupby(K=50).covered.mean(),1.0,True
+consbound_tightness_vs_K.pdf,K=100 median B/L,1.646,results/data/exp_12_rollout_bridge.csv:groupby(K=100).ratio_L.median(),1.646,True
+consbound_tightness_vs_K.pdf,K=100 median B/Rmax,0.147,results/data/exp_12_rollout_bridge.csv:groupby(K=100).ratio_Rmax.median(),0.147,True
+consbound_rate_vs_K.pdf,K=100 median Xbar/C2,1.0097,results/data/exp_12_rollout_bridge.csv:groupby(K=100).ratio_XC2.median(),1.0097,True
+consbound_tightness_vs_K.pdf,K=100 coverage,1.0,results/data/exp_12_rollout_bridge.csv:groupby(K=100).covered.mean(),1.0,True
+consbound_tightness_vs_K.pdf,K=200 median B/L,1.614,results/data/exp_12_rollout_bridge.csv:groupby(K=200).ratio_L.median(),1.614,True
+consbound_tightness_vs_K.pdf,K=200 median B/Rmax,0.145,results/data/exp_12_rollout_bridge.csv:groupby(K=200).ratio_Rmax.median(),0.145,True
+consbound_rate_vs_K.pdf,K=200 median Xbar/C2,0.9922,results/data/exp_12_rollout_bridge.csv:groupby(K=200).ratio_XC2.median(),0.9922,True
+consbound_tightness_vs_K.pdf,K=200 coverage,1.0,results/data/exp_12_rollout_bridge.csv:groupby(K=200).covered.mean(),1.0,True
+consbound_tightness_vs_K.pdf,K=400 median B/L,1.608,results/data/exp_12_rollout_bridge.csv:groupby(K=400).ratio_L.median(),1.608,True
+consbound_tightness_vs_K.pdf,K=400 median B/Rmax,0.145,results/data/exp_12_rollout_bridge.csv:groupby(K=400).ratio_Rmax.median(),0.145,True
+consbound_rate_vs_K.pdf,K=400 median Xbar/C2,0.9871,results/data/exp_12_rollout_bridge.csv:groupby(K=400).ratio_XC2.median(),0.9871,True
+consbound_tightness_vs_K.pdf,K=400 coverage,1.0,results/data/exp_12_rollout_bridge.csv:groupby(K=400).covered.mean(),1.0,True
+correlated_committee.pdf,s=500 plug-in undercoverage,0.0,results/data/exp_14_correlated_committees.csv:s=500.plugin_under_coverage_rate,0.0,True
+correlated_true_loss.pdf,s=500 mean true_loss,0.351,results/data/exp_14_correlated_committees.csv:s=500.mean_true_loss,0.351,True
+correlated_committee.pdf,s=300 plug-in undercoverage,0.12,results/data/exp_14_correlated_committees.csv:s=300.plugin_under_coverage_rate,0.12,True
+correlated_true_loss.pdf,s=300 mean true_loss,0.352,results/data/exp_14_correlated_committees.csv:s=300.mean_true_loss,0.352,True
+correlated_committee.pdf,s=200 plug-in undercoverage,0.5,results/data/exp_14_correlated_committees.csv:s=200.plugin_under_coverage_rate,0.5,True
+correlated_true_loss.pdf,s=200 mean true_loss,0.354,results/data/exp_14_correlated_committees.csv:s=200.mean_true_loss,0.354,True
+correlated_committee.pdf,s=150 plug-in undercoverage,0.62,results/data/exp_14_correlated_committees.csv:s=150.plugin_under_coverage_rate,0.62,True
+correlated_true_loss.pdf,s=150 mean true_loss,0.355,results/data/exp_14_correlated_committees.csv:s=150.mean_true_loss,0.355,True
+correlated_committee.pdf,s=100 plug-in undercoverage,0.62,results/data/exp_14_correlated_committees.csv:s=100.plugin_under_coverage_rate,0.62,True
+correlated_true_loss.pdf,s=100 mean true_loss,0.358,results/data/exp_14_correlated_committees.csv:s=100.mean_true_loss,0.358,True
+correlated_committee.pdf,s=75 plug-in undercoverage,0.88,results/data/exp_14_correlated_committees.csv:s=75.plugin_under_coverage_rate,0.88,True
+correlated_true_loss.pdf,s=75 mean true_loss,0.361,results/data/exp_14_correlated_committees.csv:s=75.mean_true_loss,0.361,True
+correlated_committee.pdf,s=50 plug-in undercoverage,1.0,results/data/exp_14_correlated_committees.csv:s=50.plugin_under_coverage_rate,1.0,True
+correlated_true_loss.pdf,s=50 mean true_loss,0.366,results/data/exp_14_correlated_committees.csv:s=50.mean_true_loss,0.366,True
+correlated_committee.pdf,s=30 plug-in undercoverage,1.0,results/data/exp_14_correlated_committees.csv:s=30.plugin_under_coverage_rate,1.0,True
+correlated_true_loss.pdf,s=30 mean true_loss,0.377,results/data/exp_14_correlated_committees.csv:s=30.mean_true_loss,0.377,True
+correlated_committee.pdf,s=20 plug-in undercoverage,1.0,results/data/exp_14_correlated_committees.csv:s=20.plugin_under_coverage_rate,1.0,True
+correlated_true_loss.pdf,s=20 mean true_loss,0.388,results/data/exp_14_correlated_committees.csv:s=20.mean_true_loss,0.388,True
+correlated_committee.pdf,s=10 plug-in undercoverage,1.0,results/data/exp_14_correlated_committees.csv:s=10.plugin_under_coverage_rate,1.0,True
+correlated_true_loss.pdf,s=10 mean true_loss,0.418,results/data/exp_14_correlated_committees.csv:s=10.mean_true_loss,0.418,True
+correlated_committee.pdf,s=5 plug-in undercoverage,1.0,results/data/exp_14_correlated_committees.csv:s=5.plugin_under_coverage_rate,1.0,True
+correlated_true_loss.pdf,s=5 mean true_loss,0.461,results/data/exp_14_correlated_committees.csv:s=5.mean_true_loss,0.461,True
+correlated_committee.pdf,s=2 plug-in undercoverage,1.0,results/data/exp_14_correlated_committees.csv:s=2.plugin_under_coverage_rate,1.0,True
+correlated_true_loss.pdf,s=2 mean true_loss,0.523,results/data/exp_14_correlated_committees.csv:s=2.mean_true_loss,0.523,True
+rareunit_m_vs_inv_p.pdf,fit slope,1.002,"results/data/exp_a3_rare_unit_scaling.csv:polyfit(log(inv_p),log(m_required))",1.002,True
+rareunit_m_vs_inv_p.pdf,R^2,1.0,results/data/exp_a3_rare_unit_scaling.csv:polyfit residual R^2,1.0,True
+rareunit_m_vs_inv_p.pdf,p=0.1 m_required,2068,results/data/exp_a3_rare_unit_scaling.csv:p=0.1.m_required,2068,True
+rareunit_m_vs_inv_p.pdf,p=0.03 m_required,6919,results/data/exp_a3_rare_unit_scaling.csv:p=0.03.m_required,6919,True
+rareunit_m_vs_inv_p.pdf,p=0.01 m_required,20781,results/data/exp_a3_rare_unit_scaling.csv:p=0.01.m_required,20781,True
+eta_success_term_violation.pdf,instances,1200,results/data/exp_02_eta_positive_success_term.csv:len(df),1200,True
+exp_06_naive_vs_true_scatter.pdf,instances,3600,results/data/exp_06_prefix_drift.csv:len(df),3600,True
+falsification_violation.pdf,unweighted violation rate,1.0,results/data/exp_05_falsification.csv:baseline=unweighted.violation_rate,1.0,True
+falsification_violation.pdf,plugin_alpha violation rate,0.177,results/data/exp_05_falsification.csv:baseline=plugin_alpha.violation_rate,0.177,True
