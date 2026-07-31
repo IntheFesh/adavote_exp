@@ -17,15 +17,25 @@ from common import certificates as C
 from common.certificates import Game, UnitKey, UnitInfo
 
 
+_ALPHA_TAG = 1  # integer stream tag, disambiguates this seed use from others
+
 def make_alpha_fn(seed: int, lo: float = 0.55, hi: float = 0.9):
     """Per-unit α drawn deterministically from U(lo, hi) keyed on the unit.
 
-    Using a hash of the unit key keeps α reproducible and independent of
-    enumeration order.
+    Uses np.random.default_rng with an all-integer entropy tuple (unit key +
+    an integer stream tag), NOT Python's built-in hash(). hash() of a tuple
+    containing a str is randomized per-process (PEP 456 SipHash) unless
+    PYTHONHASHSEED is fixed, which silently made this "reproducible" claim
+    false: two runs with an identical `seed` produced different alpha(u), and
+    hence different C0/C1/C2/true_loss, every fresh process invocation.
+    default_rng's SeedSequence is deterministic across processes/machines for
+    a given integer entropy list, so this is genuinely reproducible.
+    len(prefix) is included ahead of the prefix digits to disambiguate
+    prefixes of different lengths (e.g. (1,2) vs (12,)).
     """
     def alpha_fn(t, s, i, prefix):
-        h = hash((seed, "alpha", t, s, i, tuple(prefix))) & 0xFFFFFFFF
-        r = (h / 0xFFFFFFFF)
+        entropy = [seed, _ALPHA_TAG, t, s, i, len(prefix)] + [int(p) for p in prefix]
+        r = np.random.default_rng(entropy).random()
         return lo + (hi - lo) * r
     return alpha_fn
 

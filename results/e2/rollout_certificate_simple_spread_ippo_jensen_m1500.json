@@ -1,0 +1,37 @@
+{
+  "env": "simple_spread",
+  "algo": "ippo",
+  "N": 5,
+  "n": 3,
+  "T": 25,
+  "m": 1500,
+  "m_F": 1173,
+  "delta_B": 0.05,
+  "delta_r_hat": 2.697220022479693,
+  "estimator": "jensen_conditional_mean",
+  "Rmax_hat": 67.43050056199232,
+  "mean_return": -21.143151154188644,
+  "alpha_hat_endorse": 0.21799999999999997,
+  "per_K": {
+    "8000": {
+      "Bhat": 41.26741102321358,
+      "Bhat_capped": 41.26741102321358,
+      "Rmax": 67.43050056199232,
+      "ratio_Rmax": 0.6119991795889804,
+      "ratio_Rmax_capped": 0.6119991795889804,
+      "range_cap_active": false,
+      "m_F": 1173,
+      "X_bar": 9.619019129872322,
+      "X_var": 1383.95072699643,
+      "variance_term": 2.609017031328894,
+      "range_term": 29.03937486201237,
+      "X_bar_over_Rmax": 0.14265086347726375,
+      "variance_term_over_Rmax": 0.038691942215826954,
+      "range_term_over_Rmax": 0.4306563738958898,
+      "jensen_pop_bound": 39.98136853896744,
+      "mean_raw_swing": 0.16400714628938315,
+      "mean_ref_tail_std": 1.0138250341966178e-06,
+      "mean_fb_tail_std": 1.0297307630484716e-06
+    }
+  }
+}

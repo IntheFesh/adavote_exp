@@ -445,14 +445,19 @@ def empirical_bernstein(X: np.ndarray, delta: float, b: float) -> float:
 
         B̂ = X̄ + sqrt(2 σ̂² ln(2/δ) / m) + 7 b ln(2/δ) / (3 (m-1))
 
-    where σ̂² is the (population) sample variance, m=len(X), b is the range
-    bound (X ∈ [0, b]).
+    where σ̂² is the UNBIASED sample variance (ddof=1),
+        σ̂² = (1/(m-1)) Σ_j (X_j - X̄)²
+            = (1/(m(m-1))) Σ_{i<j} (X_i - X_j)²   (equivalent pairwise form),
+    m=len(X), b is the range bound (X ∈ [0, b]). Maurer & Pontil (2009) state
+    the inequality in the pairwise form; using the biased (ddof=0) variance
+    here would understate σ̂² by a factor of (m-1)/m and understate the
+    resulting radius, which is NOT covered by their guarantee.
     """
     X = np.asarray(X, dtype=float)
     m = len(X)
     assert m >= 2, "empirical-Bernstein needs m >= 2"
     xbar = X.mean()
-    var = X.var(ddof=0)
+    var = X.var(ddof=1)
     L = np.log(2.0 / delta)
     return float(xbar + np.sqrt(2.0 * var * L / m) + 7.0 * b * L / (3.0 * (m - 1)))
 
@@ -579,3 +584,51 @@ def wfb_plus_from_rollouts_eb(
     rad_ref = rad_empirical_bernstein(K, delta_prime, B_Q, sigma2_ref)
     rad_fb = rad_empirical_bernstein(K, delta_prime, B_Q, sigma2_fb)
     return float(clip_pos(np.asarray(Qref_hat - Qfb_hat)) + rad_ref + rad_fb)
+
+
+# --------------------------------------------------------------------------- #
+# Conditional-mean conservative estimator (Theorem 4, corrected) — replaces
+# the per-unit high-probability radius bump above with a Jensen-inequality
+# argument that holds unconditionally (no delta_G, no per-unit union bound,
+# no joint-coverage event).
+#
+# Q_hat^ref, Q_hat^fb are each the empirical mean of K i.i.d. resettable
+# rollouts (independent draws for the two tails), so E[Q_hat^ref] = Q^ref and
+# E[Q_hat^fb] = Q^fb exactly (unbiased), for every K >= 1. Let
+#     Y = Q_hat^ref - Q_hat^fb            (E[Y] = Delta = Q^ref - Q^fb)
+#     W_tilde = [Y]_+ = max(Y, 0).
+# [.]_+ is convex, so by (conditional) Jensen's inequality:
+#     E[W_tilde | U, F=1, a_fb] = E[[Y]_+] >= [E[Y]]_+ = [Delta]_+ = Delta_+.
+# This holds EXACTLY, for every K (verified by exact-Fraction enumeration on
+# toy discrete tail-return distributions, including Delta<=0 boundary cases),
+# with no probabilistic caveat -- unlike the old Hoeffding-radius construction,
+# domination here is a deterministic inequality of expectations, not a
+# high-probability event. The finite-K excess (Jensen gap) shrinks as K grows
+# (empirically ~ K^{-1/2} on the toy checks), with a population-level upper
+# bound nH*B_Q/sqrt(2K) (Popoviciu-type variance bound on a range-[0,B_Q]
+# difference).
+#
+# Since E[X_j] = nH*E[F_j*W_tilde_j] >= nH*E_mu[g*Delta_+] = C2 >= L holds at
+# the POPULATION level (in expectation over the K-rollout draws AND the unit
+# sampling), Theorem 3's empirical-Bernstein concentration over the m i.i.d.
+# draws of X_j (delta_B only -- no delta_G, no delta', no m_F) is now the
+# ONLY probabilistic layer: B_hat = mean(X) + EB_radius(X, delta_B) >= E[X]
+# >= C2 >= L with probability >= 1 - delta_B.
+# --------------------------------------------------------------------------- #
+def wtilde_jensen_from_rollouts(Qref_hat: float, Qfb_hat: float, B_Q: float) -> float:
+    """Corrected Theorem-4 per-unit estimator: W_tilde(u) = [Q_hat^ref - Q_hat^fb]_+,
+    capped at B_Q only for the clean range guarantee 0 <= W_tilde <= B_Q (NOT
+    a confidence-radius bump -- there is no radius/delta' in this construction
+    at all). Q_hat^ref, Q_hat^fb are empirical means over K resettable
+    rollouts each, with returns in [0, B_Q].
+    """
+    w = float(clip_pos(np.asarray(Qref_hat - Qfb_hat)))
+    return min(B_Q, w)
+
+
+def jensen_population_bound_K(nH: float, B_Q: float, K: int) -> float:
+    """Population-level upper bound on the Jensen gap nH*(E[W_tilde]-Delta_+),
+    O(K^{-1/2}): nH*B_Q / sqrt(2K). Reported alongside the empirical Xbar/C2
+    ratio as a theoretical cross-check, not used in the certificate itself.
+    """
+    return float(nH * B_Q / np.sqrt(2.0 * K))

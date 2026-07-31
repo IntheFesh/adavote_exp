@@ -1,0 +1,47 @@
+{
+  "m150_K100": {
+    "m": 150,
+    "K": 100,
+    "n": 3,
+    "T": 25,
+    "delta_B": 0.05,
+    "nH": 75,
+    "Rmax_hat": 57.18455649912357,
+    "mean_plus_variance_term_over_Rmax": 0.1202129282978844,
+    "range_term_over_Rmax": 4.332576540066704,
+    "total_ratio_Rmax": 4.452789468364588,
+    "reported_ratio_Rmax": 4.452789468364588,
+    "range_term_pct_of_total": 97.30027819298549,
+    "note": "range_term_over_Rmax = 7*nH*ln(2/delta_B)/(3*(m-1)); Rmax cancels exactly because b0 = nH*Rmax_hat, so this term depends only on (n,T,delta_B,m), not on how B_Q/Rmax_hat is estimated."
+  },
+  "m1500_K8000": {
+    "m": 1500,
+    "K": 8000,
+    "n": 3,
+    "T": 25,
+    "delta_B": 0.05,
+    "nH": 75,
+    "Rmax_hat": 67.43050056199232,
+    "mean_plus_variance_term_over_Rmax": 0.18134280569309072,
+    "range_term_over_Rmax": 0.4306563738958898,
+    "total_ratio_Rmax": 0.6119991795889805,
+    "reported_ratio_Rmax": 0.6119991795889804,
+    "range_term_pct_of_total": 70.36878287731025,
+    "note": "range_term_over_Rmax = 7*nH*ln(2/delta_B)/(3*(m-1)); Rmax cancels exactly because b0 = nH*Rmax_hat, so this term depends only on (n,T,delta_B,m), not on how B_Q/Rmax_hat is estimated."
+  },
+  "m3000_K25000": {
+    "m": 3000,
+    "K": 25000,
+    "n": 3,
+    "T": 25,
+    "delta_B": 0.05,
+    "nH": 75,
+    "Rmax_hat": 79.96343187987804,
+    "mean_plus_variance_term_over_Rmax": 0.14263737679593322,
+    "range_term_over_Rmax": 0.21525638695229704,
+    "total_ratio_Rmax": 0.35789376374823023,
+    "reported_ratio_Rmax": 0.3578937637482303,
+    "range_term_pct_of_total": 60.145330474024355,
+    "note": "range_term_over_Rmax = 7*nH*ln(2/delta_B)/(3*(m-1)); Rmax cancels exactly because b0 = nH*Rmax_hat, so this term depends only on (n,T,delta_B,m), not on how B_Q/Rmax_hat is estimated."
+  }
+}
