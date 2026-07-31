@@ -14,7 +14,7 @@ from e1_tabular.exp_a3_rare_unit_scaling import (
 )
 from e1_tabular.exp_a4_adjacent_baselines import run as run_a4
 from e1_tabular.exp_14_correlated_committees import (
-    fail_prob_given_theta, oracle_g_betabinom, run as run_exp14,
+    fail_prob_given_theta, g_mixture, run as run_exp14,
 )
 
 
@@ -59,21 +59,38 @@ def test_a4_headline_methods_present_and_finite():
         assert (sub["bound"] >= 0).all()
 
 
-def test_exp14_oracle_matches_direct_binomial_at_zero_dispersion_limit():
-    # As kappa grows, theta concentrates at alpha, so the Beta-Binomial oracle
-    # should approach the plain Binomial g_N(N, alpha). kappa is kept moderate
-    # (not e.g. 1e6): at extreme kappa the Beta(alpha*kappa,(1-alpha)*kappa)
-    # density becomes a needle-thin spike that scipy.integrate.quad's default
-    # adaptive sampling can miss entirely (verified directly: at kappa=1e6 quad
-    # returns ~1e-172 while a 20M-draw Monte Carlo cross-check at the actually
-    # -used kappa=20 confirms quad IS accurate in the regime this experiment
-    # uses -- this is a quad robustness limit at extreme kappa, not a bug
-    # reachable by exp_14's own kappa=20 default).
+def test_exp14_g_mixture_matches_direct_binomial_at_large_s():
+    # As s grows, Theta ~ Beta(alpha*s, (1-alpha)*s) concentrates at alpha, so
+    # the mixture should approach the plain Binomial g_N(N, alpha). s is kept
+    # moderate (not e.g. 1e6): at extreme concentration the Beta density
+    # becomes a needle-thin spike that scipy.integrate.quad's default adaptive
+    # sampling can miss entirely (verified directly: at s=1e6 quad returns
+    # ~1e-172; a 20M-draw Monte Carlo cross-check at s=20 confirmed quad IS
+    # accurate in the regime exp_14 actually uses -- a quad robustness limit
+    # at extreme concentration, not a bug reachable by exp_14's own S_VALUES).
     from common.certificates import g_N
     N, alpha = 7, 0.7
     g_direct = g_N(N, alpha)
-    g_oracle_highkappa = oracle_g_betabinom(N, alpha, kappa=5000.0)
-    assert abs(g_direct - g_oracle_highkappa) < 1e-3
+    g_mix_large_s = g_mixture(N, alpha, s=5000.0)
+    assert abs(g_direct - g_mix_large_s) < 1e-3
+
+
+def test_exp14_g_mixture_exceeds_plugin_for_alpha_above_half():
+    # Jensen: g_N is strictly convex for alpha>1/2 (g_N''(alpha) =
+    # -60 alpha(1-alpha)(1-2alpha) > 0 there for N=5), so the de Finetti
+    # mixture must exceed the plug-in value, with the gap GROWING as s shrinks
+    # (Var(Theta) = alpha(1-alpha)/(s+1) grows as s shrinks). This is the
+    # exact mechanism Task 7 diagnosed as missing from exp_14 v1.
+    from common.certificates import g_N
+    N, alpha = 5, 0.7
+    g_plugin = g_N(N, alpha)
+    gaps = []
+    for s in [500, 100, 30, 5, 2]:
+        gap = g_mixture(N, alpha, s) - g_plugin
+        assert gap > 0
+        gaps.append(gap)
+    # gaps computed at s descending (500->2): gap must be non-decreasing.
+    assert np.all(np.diff(gaps) > 0)
 
 
 def test_exp14_fail_prob_given_theta_matches_binom_cdf():
@@ -84,8 +101,17 @@ def test_exp14_fail_prob_given_theta_matches_binom_cdf():
                           binom.cdf(np.floor(N / 2), N, theta))
 
 
-def test_exp14_run_produces_valid_rates():
-    df, g_oracle = run_exp14(N=5, alpha=0.7, kappa=20.0, s_values=[50, 5],
-                              n_trials=20, seed=0)
-    assert 0.0 <= g_oracle <= 1.0
-    assert ((df["under_coverage_rate"] >= 0) & (df["under_coverage_rate"] <= 1)).all()
+def test_exp14_run_mixture_certificate_never_violates():
+    df, df_detail = run_exp14(n_games=2, s_values=[100, 5], N_committee=5,
+                               seed=0, S=4, A=3, H=4, N=5)
+    assert (df["mixture_violations"] == 0).all()
+    assert ((df["plugin_under_coverage_rate"] >= 0) &
+            (df["plugin_under_coverage_rate"] <= 1)).all()
+
+
+def test_exp14_run_true_loss_and_gap_increase_as_s_shrinks():
+    df, _ = run_exp14(n_games=3, s_values=[200, 20, 2], N_committee=5,
+                       seed=0, S=4, A=3, H=4, N=5)
+    df = df.sort_values("s", ascending=False)  # s: 200 -> 20 -> 2
+    assert np.all(np.diff(df["mean_true_loss"].values) >= -1e-9)
+    assert np.all(np.diff(df["gap_mixture_minus_plugin"].values) >= -1e-9)
