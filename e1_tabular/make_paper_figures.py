@@ -300,7 +300,7 @@ def fig_correlated():
     ax.set_xscale("log")
     ax.set_xlabel(r"over-dispersion strength $1/(a_u+b_u)$")
     ax.set_ylabel("certificate violation rate")
-    ax.legend(loc="upper left", fontsize=9)
+    ax.legend(loc="lower right", fontsize=9)
     save(fig, "correlated_committee.pdf")
 
     fig, ax = plt.subplots(figsize=(6.0, 4.0))
@@ -338,7 +338,7 @@ def fig_rareunit():
     ax.set_yscale("log")
     ax.set_xlabel(r"$1/p$ (inverse occupancy of rare unit $u^*$)")
     ax.set_ylabel(r"$m$ (required episode budget)")
-    ax.set_title(f"rare-unit sample complexity: $m \\gtrsim 1/p$ (empirical slope {slope:.3f})")
+    ax.set_title(f"occupancy dependence of the rare-unit budget (empirical slope {slope:.3f})")
     ax.legend(loc="lower right")
     save(fig, "rareunit_m_vs_inv_p.pdf")
 
